@@ -1,0 +1,53 @@
+version: '3.9'
+# ============================================================
+#  ODOO 19 — Docker Compose
+#  PostgreSQL sur le VPS (hors Docker)
+#  Odoo dans Docker
+# ============================================================
+
+services:
+
+  odoo19:
+    image: odoo:19
+    container_name: odoo19-mobach
+    restart: always
+    # ← Lance le fix de permissions puis démarre Odoo
+    user: root
+    entrypoint:
+      - bash
+      - -c
+      - |
+        echo '>>> Fix permissions...'
+        mkdir -p /var/lib/odoo/sessions
+        mkdir -p /var/log/odoo
+        chown -R odoo:odoo /var/lib/odoo
+        chown -R odoo:odoo /var/log/odoo
+        chmod -R 755 /var/lib/odoo
+        chmod 700 /var/lib/odoo/sessions
+        echo '>>> Demarrage Odoo...'
+        exec su odoo -s /bin/bash -c 'odoo --config=/etc/odoo/odoo.conf' & tail -F /var/log/odoo/odoo.log
+
+    ports:
+      - "8019:8069"
+      - "8072:8072"
+
+    environment:
+      HOST: host.docker.internal
+      USER: odoo
+      PASSWORD: odoo
+
+    volumes:
+      # Sources Odoo (clonées depuis GitHub)
+      - ./../odoo:/mnt/extra-addons/odoo
+      # Modules custom MOBACH
+      - ./MOBACH_ODOO_CUSTOM:/mnt/extra-addons/mobach
+      # Configuration
+      - ./config:/etc/odoo
+      # Logs
+      - ./../mobach_odoo19_logs:/var/log/odoo
+      # Filestore (pièces jointes, images)
+      - ./../mobach_odoo19_filestore:/var/lib/odoo
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
