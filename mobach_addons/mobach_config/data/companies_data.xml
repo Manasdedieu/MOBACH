@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Données initiales des sociétés MOBACH
+        noupdate="1" : chargé une seule fois à l'installation, pas réécrasé lors des upgrades
+    -->
+    <data noupdate="1">
+
+        <!-- ================================================================
+             SOCIÉTÉ 1 : MOBACH SARL  (société principale - base.main_company)
+             Couleur principale : Bleu #0070C0 | Secondaire : #003F6B | Agencement : Bubble
+             Activité : Commerce général / Holding de groupe
+        ================================================================ -->
+
+        <record id="base.main_partner" model="res.partner">
+            <field name="name">MOBACH SARL</field>
+            <field name="company_id" eval="False"/>
+            <field name="is_company" eval="True"/>
+            <field name="company_type">company</field>
+            <field name="image_1920" type="base64" file="mobach_config/static/image/mobach_sarl.jpeg"/>
+            <field name="lang">fr_FR</field>
+            <field name="street">Rue de Maroua</field>
+            <field name="city">Maroua</field>
+            <field name="country_id" ref="base.cm"/>
+            <field name="phone">+237698861321</field>
+            <field name="email">mobach23.sarl@yahoo.com</field>
+        </record>
+
+        <record id="base.main_company" model="res.company">
+            <field name="name">MOBACH SARL</field>
+            <field name="partner_id" ref="base.main_partner"/>
+            <field name="currency_id" ref="base.XAF"/>
+            <field name="city">Maroua</field>
+            <field name="street">Rue de Maroua</field>
+            <field name="country_id" ref="base.cm"/>
+            <field name="phone">+237698861321</field>
+            <field name="email">mobach23.sarl@yahoo.com</field>
+            <field name="nui">M022317978287A</field>
+            <field name="primary_color">#0070C0</field>
+            <field name="secondary_color">#003F6B</field>
+            <field name="external_report_layout_id" ref="web.external_layout_bubble"/>
+            <field name="font">Lato</field>
+            <!-- En-tête rapport : tagline MOBACH -->
+            <field name="report_header">&lt;p&gt;&lt;strong&gt;Votre partenaire commercial de confiance&lt;/strong&gt;&lt;/p&gt;</field>
+            <!-- Pied de page : mentions légales OHADA -->
+            <field name="report_footer">&lt;p&gt;MOBACH SARL au capital de 1 000 000 FCFA | RCCM : MA-MAR-2022-B-0001 | NUI : M022317978287A | BP : Maroua, Cameroun | Tél : +237 698 861 321 | Email : mobach23.sarl@yahoo.com&lt;/p&gt;</field>
+            <!-- Détails en-tête de documents -->
+            <field name="company_details">&lt;p&gt;MOBACH SARL&lt;br/&gt;Rue de Maroua, Maroua - Cameroun&lt;br/&gt;Tél : +237 698 861 321 | Email : mobach23.sarl@yahoo.com&lt;br/&gt;NUI : M022317978287A&lt;/p&gt;</field>
+        </record>
+
+        <!-- ================================================================
+             SOCIÉTÉ 2 : NAS ET FILS SARL
+             Couleur principale : Bleu ciel #00B0F0 | Secondaire : #006A96 | Agencement : Bubble
+             Activité : Commerce / Distribution familiale
+        ================================================================ -->
+
+        <record id="partner_nas_et_fils" model="res.partner">
+            <field name="name">NAS ET FILS SARL</field>
+            <field name="company_id" eval="False"/>
+            <field name="is_company" eval="True"/>
+            <field name="company_type">company</field>
+            <field name="image_1920" type="base64" file="mobach_config/static/image/nas_et_fils.jpeg"/>
+            <field name="lang">fr_FR</field>
+            <field name="street">Rue principale</field>
+            <field name="city">Maroua</field>
+            <field name="country_id" ref="base.cm"/>
+            <field name="phone">+237699931366</field>
+            <field name="email">nasetfils.sarl@yahoo.com</field>
+        </record>
+
+        <record id="company_nas_et_fils" model="res.company">
+            <field name="name">NAS ET FILS SARL</field>
+            <field name="partner_id" ref="partner_nas_et_fils"/>
+            <field name="currency_id" ref="base.XAF"/>
+            <field name="city">Maroua</field>
+            <field name="street">Rue principale</field>
+            <field name="country_id" ref="base.cm"/>
+            <field name="phone">+237699931366</field>
+            <field name="email">nasetfils.sarl@yahoo.com</field>
+            <field name="nui">M032416493739W</field>
+            <field name="primary_color">#00B0F0</field>
+            <field name="secondary_color">#006A96</field>
+            <field name="external_report_layout_id" ref="web.external_layout_bubble"/>
+            <field name="font">Roboto</field>
+            <field name="report_header">&lt;p&gt;&lt;strong&gt;Le commerce au service de votre famille&lt;/strong&gt;&lt;/p&gt;</field>
+            <field name="report_footer">&lt;p&gt;NAS ET FILS SARL au capital de 1 000 000 FCFA | RCCM : MA-MAR-2024-B-0002 | NUI : M032416493739W | BP : Maroua, Cameroun | Tél : +237 699 931 366 | Email : nasetfils.sarl@yahoo.com&lt;/p&gt;</field>
+            <field name="company_details">&lt;p&gt;NAS ET FILS SARL&lt;br/&gt;Rue Principale, Maroua - Cameroun&lt;br/&gt;Tél : +237 699 931 366 | Email : nasetfils.sarl@yahoo.com&lt;br/&gt;NUI : M032416493739W&lt;/p&gt;</field>
+        </record>
+
+        <!-- ================================================================
+             SOCIÉTÉ 3 : MOHAMADOU BACHIROU SARL (M&B)
+             Couleur principale : Orange clair #FFB347 | Secondaire : #C47A00 | Agencement : Boxed
+             Activité : Affaires personnelles / Entreprise individuelle constituée en SARL
+        ================================================================ -->
+
+        <record id="partner_mohamadou_bachirou" model="res.partner">
+            <field name="name">MOHAMADOU BACHIROU SARL</field>
+            <field name="company_id" eval="False"/>
+            <field name="is_company" eval="True"/>
+            <field name="company_type">company</field>
+            <field name="image_1920" type="base64" file="mobach_config/static/image/mb_sarl.jpeg"/>
+            <field name="lang">fr_FR</field>
+            <field name="street">Centre Commercial</field>
+            <field name="city">Maroua</field>
+            <field name="country_id" ref="base.cm"/>
+            <field name="phone">+237699931366</field>
+            <field name="email">mb.sarl@yahoo.fr</field>
+        </record>
+
+        <record id="company_mohamadou_bachirou" model="res.company">
+            <field name="name">MOHAMADOU BACHIROU SARL</field>
+            <field name="partner_id" ref="partner_mohamadou_bachirou"/>
+            <field name="currency_id" ref="base.XAF"/>
+            <field name="city">Maroua</field>
+            <field name="street">Centre Commercial</field>
+            <field name="country_id" ref="base.cm"/>
+            <field name="phone">+237699931366</field>
+            <field name="email">mb.sarl@yahoo.fr</field>
+            <field name="nui">M032416493275W</field>
+            <field name="primary_color">#FFB347</field>
+            <field name="secondary_color">#C47A00</field>
+            <field name="external_report_layout_id" ref="web.external_layout_boxed"/>
+            <field name="font">Open_Sans</field>
+            <field name="report_header">&lt;p&gt;&lt;strong&gt;Excellence et rigueur dans chaque transaction&lt;/strong&gt;&lt;/p&gt;</field>
+            <field name="report_footer">&lt;p&gt;MOHAMADOU BACHIROU SARL au capital de 1 000 000 FCFA | RCCM : MA-MAR-2024-B-0003 | NUI : M032416493275W | BP : Maroua, Cameroun | Tél : +237 699 931 366 | Email : mb.sarl@yahoo.fr&lt;/p&gt;</field>
+            <field name="company_details">&lt;p&gt;MOHAMADOU BACHIROU SARL&lt;br/&gt;Centre Commercial, Maroua - Cameroun&lt;br/&gt;Tél : +237 699 931 366 | Email : mb.sarl@yahoo.fr&lt;br/&gt;NUI : M032416493275W&lt;/p&gt;</field>
+        </record>
+
+        <!-- ================================================================
+             SOCIÉTÉ 4 : AFRIDRIVE SARL
+             Couleur principale : Jaune clair #FFD700 | Secondaire : #B8960C | Agencement : Boxed
+             Activité : Transport routier / Services de conduite et logistique
+        ================================================================ -->
+
+        <record id="partner_afridrive" model="res.partner">
+            <field name="name">AFRIDRIVE SARL</field>
+            <field name="company_id" eval="False"/>
+            <field name="is_company" eval="True"/>
+            <field name="company_type">company</field>
+            <field name="image_1920" type="base64" file="mobach_config/static/image/afridrive_sarl.jpeg"/>
+            <field name="lang">fr_FR</field>
+            <field name="street">Centre Commercial</field>
+            <field name="city">Maroua</field>
+            <field name="country_id" ref="base.cm"/>
+            <field name="phone">+237699931366</field>
+            <field name="email">afridrive.sarl@yahoo.fr</field>
+        </record>
+
+        <record id="company_afridrive" model="res.company">
+            <field name="name">AFRIDRIVE SARL</field>
+            <field name="partner_id" ref="partner_afridrive"/>
+            <field name="currency_id" ref="base.XAF"/>
+            <field name="city">Maroua</field>
+            <field name="street">Centre Commercial</field>
+            <field name="country_id" ref="base.cm"/>
+            <field name="phone">+237699931366</field>
+            <field name="email">afridrive.sarl@yahoo.fr</field>
+            <field name="nui">M032416493275W</field>
+            <field name="primary_color">#FFD700</field>
+            <field name="secondary_color">#B8960C</field>
+            <field name="external_report_layout_id" ref="web.external_layout_boxed"/>
+            <field name="font">Montserrat</field>
+            <field name="report_header">&lt;p&gt;&lt;strong&gt;Transport &amp;amp; Logistique — Votre mobilité, notre mission&lt;/strong&gt;&lt;/p&gt;</field>
+            <field name="report_footer">&lt;p&gt;AFRIDRIVE SARL au capital de 1 000 000 FCFA | RCCM : MA-MAR-2024-B-0004 | NUI : M032416493275W | BP : Maroua, Cameroun | Tél : +237 699 931 366 | Email : afridrive.sarl@yahoo.fr&lt;/p&gt;</field>
+            <field name="company_details">&lt;p&gt;AFRIDRIVE SARL&lt;br/&gt;Centre Commercial, Maroua - Cameroun&lt;br/&gt;Tél : +237 699 931 366 | Email : afridrive.sarl@yahoo.fr&lt;br/&gt;NUI : M032416493275W&lt;/p&gt;</field>
+        </record>
+
+        <!-- ================================================================
+             ACTIVATION MULTI-SOCIÉTÉS
+             - Ajouter toutes les sociétés à l'utilisateur admin
+             - Activer le groupe multi-sociétés pour l'admin
+        ================================================================ -->
+
+        <record id="base.user_admin" model="res.users">
+            <field name="company_ids" eval="[
+                (4, ref('base.main_company')),
+                (4, ref('company_nas_et_fils')),
+                (4, ref('company_mohamadou_bachirou')),
+                (4, ref('company_afridrive')),
+            ]"/>
+            <field name="group_ids" eval="[(4, ref('base.group_multi_company'))]"/>
+        </record>
+
+    </data>
+</odoo>
+
