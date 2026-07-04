@@ -7,204 +7,232 @@ from odoo.addons.web.controllers.home import Home
 
 _logger = logging.getLogger(__name__)
 
+# ── Descriptions par défaut ───────────────────────────────────────────
+DEFAULT_DESCRIPTIONS = {
+    'base.main_company':                        'Prestation de Services & Commerce Général',
+    'mobach_config.company_nas_et_fils':        'Prestation de Services & Commerce Général',
+    'mobach_config.company_mohamadou_bachirou': 'Prestation de Services & Commerce Général',
+    'mobach_config.company_afridrive':          'Logistique & Transport',
+}
+
+XML_IDS = list(DEFAULT_DESCRIPTIONS.keys())
+
+
 class CompanyPortalController(Home):
 
-    @http.route('/', type='http', auth='public')
-    def index(self, **kw):
-        """
-        Surcharge du point d'entrée racine d'Odoo (ex: http://localhost:8069/).
-        Redirige ou sert directement le portail de sélection de société pour les utilisateurs non connectés.
-        """
-        if request.session.uid:
-            return request.redirect('/odoo')
+    # ------------------------------------------------------------------
+    # Route / — redirection vers portail ou Odoo
+    # ------------------------------------------------------------------
+    @http.route('/', type='http', auth='none')
+    def index(self, s_action=None, db=None, **kw):
+        if request.db and request.session.uid:
+            return request.redirect_query('/odoo', query=request.params)
         return self.portal_landing(**kw)
 
-    @http.route('/odoo', type='http', auth='none')
-    def web_client(self, s_action=None, **kw):
-        """
-        Surcharge de la route /odoo pour s'assurer qu'un utilisateur non connecté
-        est forcé de passer par notre portail de sélection de niveau racine pour choisir son entreprise.
-        """
-        if not request.session.uid:
-            return request.redirect('/')
-        return super(CompanyPortalController, self).web_client(s_action=s_action, **kw)
-
-    @http.route('/web/session/logout', type='http', auth="public", website=True)
-    def session_logout(self, redirect='/', **x):
-        """
-        Correctif de Déconnexion : 
-        Surcharge de l'action de déconnexion d'Odoo pour rediriger systématiquement 
-        l'utilisateur vers le portail de sélection racine '/' après s'être déconnecté.
-        """
+    # ------------------------------------------------------------------
+    # Déconnexion → retour au portail
+    # ------------------------------------------------------------------
+    @http.route('/web/session/logout', type='http', auth='public', website=True)
+    def session_logout(self, redirect='/', **kw):
         request.session.logout()
         return request.redirect('/')
 
+    # ------------------------------------------------------------------
+    # Login : mémoriser company_id (GET) et switcher après login (POST)
+    # ------------------------------------------------------------------
+    @http.route('/web/login', type='http', auth='none', readonly=False)
+    def web_login(self, redirect=None, **kw):
+        if request.httprequest.method == 'GET':
+            cid = kw.get('company_id')
+            if cid:
+                request.session['selected_portal_company_id'] = cid
+
+        response = super().web_login(redirect=redirect, **kw)
+
+        if request.httprequest.method == 'POST' and request.session.uid:
+            cid = (
+                kw.get('company_id')
+                or request.session.get('selected_portal_company_id')
+            )
+            if cid:
+                try:
+                    user = request.env.user
+                    cid_int = int(cid)
+                    if cid_int in user.company_ids.ids:
+                        user.sudo().write({'company_id': cid_int})
+                        request.session['allowed_company_ids'] = [cid_int]
+                        request.session.pop('selected_portal_company_id', None)
+                        resp = request.redirect(f'/odoo?cids={cid_int}')
+                        resp.set_cookie('cids', str(cid_int))
+                        return resp
+                    else:
+                        request.session.logout()
+                        return request.redirect(
+                            f'/?access_denied=1&company_id={cid_int}'
+                        )
+                except Exception as e:
+                    _logger.error('Erreur switch société: %s', e)
+
+        return response
+
+    # ------------------------------------------------------------------
+    # Redirection post-login
+    # ------------------------------------------------------------------
     def _login_redirect(self, uid, redirect=None):
-        """
-        Surcharge de la redirection après connexion réussie pour appliquer la société choisie.
-        """
-        cid = request.params.get('company_id') or request.session.get('selected_portal_company_id')
+        cid = (
+            request.params.get('company_id')
+            or request.session.get('selected_portal_company_id')
+        )
         if cid:
             try:
                 user = request.env['res.users'].sudo().browse(uid)
                 cid_int = int(cid)
                 if cid_int in user.company_ids.ids:
-                    _logger.info("Setting company_id = %s for user %s inside _login_redirect", cid_int, user.login)
-                    # Force user's preferred company in database to the selected one
                     user.write({'company_id': cid_int})
-                    # Set allowed company ids on session
                     request.session['allowed_company_ids'] = [cid_int]
-                    # Clean up session
                     request.session.pop('selected_portal_company_id', None)
-                    return f"/odoo#cids={cid_int}"
+                    return f'/odoo?cids={cid_int}'
                 else:
-                    _logger.warning("User %s does not have access to selected company %s", user.login, cid_int)
                     request.session.logout()
-                    return f"/?access_denied=1&company_id={cid_int}"
+                    return f'/?access_denied=1&company_id={cid_int}'
             except Exception as e:
-                _logger.error("Error in _login_redirect setting company_id: %s", str(e))
-        return super(CompanyPortalController, self)._login_redirect(uid, redirect=redirect)
+                _logger.error('_login_redirect error: %s', e)
+        return super()._login_redirect(uid, redirect=redirect)
 
-    @http.route('/web/login', type='http', auth='public', website=True)
-    def web_login(self, redirect=None, **kw):
+    # ------------------------------------------------------------------
+    # Route logo : /company_portal/logo/<id>
+    #
+    # Lit TOUJOURS le champ logo natif de res.company en base de données.
+    # → Si l'admin change le logo via Odoo, le changement est visible
+    #   immédiatement sur le portail (pas de cache fixe).
+    #
+    # Le cache-busting est géré côté portail via le paramètre ?unique=
+    # calculé à partir de company.write_date (voir portal_landing).
+    # Quand le logo change, write_date change → URL change → le navigateur
+    # fait une nouvelle requête au lieu d'utiliser le cache.
+    # ------------------------------------------------------------------
+    @http.route(
+        '/company_portal/logo/<int:company_id>',
+        type='http', auth='public', methods=['GET']
+    )
+    def company_portal_logo(self, company_id, unique=None, **kw):
         """
-        Surcharge de la page d'authentification native d'Odoo.
-        Vérifie si la société sélectionnée est transmise et force la session utilisateur dessus si l'accès est OK.
-        """
-        # Au GET, on mémorise la société choisie dans la session de l'utilisateur pour la conserver lors de la soumission du formulaire POST
-        if request.httprequest.method == 'GET':
-            cid = kw.get('company_id')
-            if cid:
-                request.session['selected_portal_company_id'] = cid
-                
-        response = super(CompanyPortalController, self).web_login(redirect=redirect, **kw)
-        
-        # Si la requête est en POST et que la connexion a réussi (uid présent dans la session)
-        if request.httprequest.method == 'POST' and request.session.uid:
-            cid = kw.get('company_id') or request.session.get('selected_portal_company_id')
-            if cid:
-                try:
-                    user = request.env.user
-                    cid_int = int(cid)
-                    
-                    # Vérifier si l'utilisateur a accès à la société choisie
-                    if cid_int in user.company_ids.ids:
-                        _logger.info("Accès autorisé. Redirection de l'utilisateur %s vers la société %s", user.login, cid_int)
-                        
-                        # On force le profil par défaut de l'utilisateur sur la société choisie
-                        user.sudo().write({'company_id': cid_int})
-                        
-                        # On force l'initialisation de la session utilisateur avec cette seule société autorisée
-                        request.session['allowed_company_ids'] = [cid_int]
-                        
-                        # Redirection conforme Odoo 19 en passant l'ID de la société dans l'URL (#cids)
-                        response = request.redirect(f"/odoo#cids={cid_int}")
-                        
-                        # On force le cookie 'cids' d'Odoo pour assurer que le client web charge immédiatement la bonne société active principale
-                        response.set_cookie('cids', f"{cid_int}")
-                        request.session.pop('selected_portal_company_id', None)
-                        return response
-                    else:
-                        _logger.warning("Accès Refusé. L'utilisateur %s n'a pas accès à la société ID %s", user.login, cid_int)
-                        
-                        # L'utilisateur n'a pas accès -> déconnexion immédiate pour empêcher la navigation et retour avec erreur
-                        request.session.logout()
-                        return request.redirect(f"/?access_denied=1&company_id={cid_int}")
-                except Exception as e:
-                    _logger.error("Erreur lors de l'attribution de la société active dans web_login: %s", str(e))
-        
-        return response
+        Sert le logo natif Odoo de la société (champ logo_web de res.company).
 
+        Cache-Control :
+          - Si ?unique=<write_date> est présent dans l'URL → cache 24 h
+            (l'URL change dès que le logo change, donc le cache est toujours
+            cohérent avec la réalité).
+          - Sans paramètre unique → no-cache (revalide à chaque requête).
+        """
+        company = request.env['res.company'].sudo().browse(company_id)
+        if not company.exists():
+            return request.not_found()
+
+        if company.logo_web:
+            import base64
+            raw = base64.b64decode(company.logo_web)
+
+            # Détection MIME (PNG, JPEG, SVG)
+            if raw[:4] == b'\x89PNG':
+                mime = 'image/png'
+            elif raw[:2] in (b'\xff\xd8', b'FF'):
+                mime = 'image/jpeg'
+            elif raw[:4] == b'<svg' or raw[:5] == b'<?xml':
+                mime = 'image/svg+xml'
+            else:
+                mime = 'image/png'  # fallback
+
+            # Cache long si unique présent, sinon revalidation systématique
+            if unique:
+                cache = 'public, max-age=86400, immutable'
+            else:
+                cache = 'no-cache'
+
+            return request.make_response(
+                raw,
+                headers=[
+                    ('Content-Type', mime),
+                    ('Cache-Control', cache),
+                ]
+            )
+
+        # Aucun logo en base → logo par défaut Odoo
+        return request.redirect(
+            f'/web/binary/company_logo?company={company_id}'
+        )
+
+    # ------------------------------------------------------------------
+    # Portail de sélection des sociétés
+    # ------------------------------------------------------------------
     @http.route('/company_portal', type='http', auth='public', website=True)
     def portal_landing(self, **kw):
-        """
-        Contrôleur de la landing page du portail de sélection d'entreprise.
-        Résout dynamiquement les sociétés créées par le module 'mobach_config' via request.env.ref.
-        """
-        # Récupération des paramètres d'erreur d'accès
         access_denied = kw.get('access_denied') == '1'
-        denied_company_id = kw.get('company_id')
-        denied_company_name = ""
-        
-        if access_denied and denied_company_id:
+        denied_company_name = ''
+
+        if access_denied and kw.get('company_id'):
             try:
-                comp = request.env['res.company'].sudo().browse(int(denied_company_id))
+                comp = request.env['res.company'].sudo().browse(
+                    int(kw['company_id'])
+                )
                 if comp.exists():
                     denied_company_name = comp.name
             except Exception:
                 pass
 
-        # Liste des XML IDs de nos sociétés configurées dans mobach_config
-        xml_ids = [
-            'base.main_company',
-            'mobach_config.company_nas_et_fils',
-            'mobach_config.company_mohamadou_bachirou',
-            'mobach_config.company_afridrive'
-        ]
-        
-        # Récupération dynamique des sociétés existantes en base de données
+        # Sociétés dans l'ordre du mapping
         companies_records = []
-        for xml_id in xml_ids:
+        for xml_id in XML_IDS:
             try:
                 company = request.env.ref(xml_id, raise_if_not_found=False)
                 if company:
-                    companies_records.append(company.sudo())
+                    companies_records.append((xml_id, company.sudo()))
             except Exception:
                 pass
-        
-        # Si aucune de ces sociétés spécifiques n'est trouvée (ex: pas encore installées), fallback sur toutes les sociétés
+
+        # Fallback : toutes les sociétés actives
         if not companies_records:
-            companies_records = request.env['res.company'].sudo().search([])
+            for c in request.env['res.company'].sudo().search(
+                [('active', '=', True)]
+            ):
+                companies_records.append(('', c))
 
         portal_companies = []
-        for company in companies_records:
-            company = company.sudo()
-            name_upper = company.name.upper()
-            
-            # Paramètres par défaut
-            subtitle = "Prestation de Services & Commerce Général"
-            logo_type = "text"
-            logo_text = company.name[:1].upper()
-            
-            # Enrichissement visuel dynamique basé sur les sociétés définies dans mobach_config
-            if "MOBACH" in name_upper:
-                subtitle = "Prestation de Services & Commerce Général"
-                logo_type = "mobach"
-                logo_text = "M"
-            elif "NAS" in name_upper:
-                subtitle = "Prestation de Services & Commerce Général"
-                logo_type = "nas"
-                logo_text = "N&F"
-            elif "BACHIROU" in name_upper or "MOHAMADOU" in name_upper or "MB" in name_upper:
-                subtitle = "Prestation de Services & Commerce Général"
-                logo_type = "mb"
-                logo_text = "MB"
-            elif "AFRI" in name_upper or "DRIVE" in name_upper:
-                subtitle = "Logistique & Transport"
-                logo_type = "afridrive"
-                logo_text = "AD"
+        for xml_id, company in companies_records:
+            description = (
+                company.portal_description
+                or DEFAULT_DESCRIPTIONS.get(
+                    xml_id, 'Prestation de Services & Commerce Général'
+                )
+            )
 
-            # Calcul dynamique exact des collaborateurs par rapport au res.users de cette société
-            # (Habilitation effective : utilisateurs d'Odoo qui appartiennent à la société)
-            collaborators_count = request.env['res.users'].sudo().search_count([
-                ('company_ids', 'in', company.id)
-            ])
+            # ── Cache-busting par write_date ──────────────────────────
+            # Quand le logo change dans Odoo, write_date est mis à jour.
+            # L'URL du logo change donc → le navigateur charge la nouvelle
+            # image immédiatement, sans avoir à vider son cache.
+            # ─────────────────────────────────────────────────────────
+            if company.write_date:
+                unique = company.write_date.strftime('%Y%m%d%H%M%S')
+            else:
+                unique = '0'
+            logo_url = f'/company_portal/logo/{company.id}?unique={unique}'
 
             portal_companies.append({
-                'id': str(company.id),
-                'name': company.name,
-                'subtitle': subtitle,
-                'collaborators': collaborators_count,
-                'logo_type': logo_type,
-                'logo_text': logo_text,
-                'primary_color': company.primary_color or "#203a54",
+                'id':            str(company.id),
+                'name':          company.name,
+                'subtitle':      description,
+                'logo_url':      logo_url,
+                'collaborators': request.env['res.users'].sudo().search_count(
+                    [('company_ids', 'in', company.id)]
+                ),
             })
 
-        values = {
-            'companies': portal_companies,
-            'access_denied': access_denied,
-            'denied_company_name': denied_company_name,
-            'current_year': datetime.date.today().year,
-        }
-        
-        return request.render('groupe_mobach_portal.portal_landing_template', values)
+        return request.render(
+            'groupe_mobach_portal.portal_landing_template',
+            {
+                'companies':           portal_companies,
+                'access_denied':       access_denied,
+                'denied_company_name': denied_company_name,
+                'current_year':        datetime.date.today().year,
+            }
+        )

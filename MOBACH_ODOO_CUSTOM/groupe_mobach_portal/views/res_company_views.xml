@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Ajout du champ portal_description uniquement dans la fiche société.
+        Le logo portail est géré automatiquement par le module
+        (logo natif de la société via /company_portal/logo/<id>).
+        On n'expose PAS portal_logo dans la vue pour éviter
+        le conflit de redirection Odoo 19 (404 sur /odoo/companies/<id>).
+    -->
+    <record id="view_company_form_portal_mobach" model="ir.ui.view">
+        <field name="name">res.company.form.portal.mobach</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//page[@name='general_info']" position="after">
+                <page string="Portail MOBACH" name="portal_mobach">
+                    <group>
+                        <group string="Affichage sur le portail de sélection">
+                            <field name="portal_description"
+                                   string="Description portail"
+                                   placeholder="Ex : Prestation de Services &amp; Commerce Général"
+                                   help="Texte affiché sous le nom de la société sur le portail de sélection. Si vide, une description par défaut est utilisée automatiquement."/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

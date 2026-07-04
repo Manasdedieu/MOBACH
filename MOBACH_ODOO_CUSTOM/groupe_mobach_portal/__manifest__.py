@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Groupe Mobach - Portail Multi-Sociétés',
-    'version': '19.0.1.0.0',
-    'summary': 'Portail de sélection et d\'aiguillage multi-société au démarrage d\'Odoo.',
+    'version': '19.0.2',
+    'summary': 'Portail de sélection multi-société avec logos et descriptions configurables.',
     'description': """
 Ce module remplace la page d\'accueil par défaut d\'Odoo par un portail d\'accueil multi-société élégant.
 - Point d\'entrée direct à la racine (http://localhost:8069/) sur le portail de sélection.
@@ -11,16 +11,14 @@ Ce module remplace la page d\'accueil par défaut d\'Odoo par un portail d\'accu
 - Surcharge de l\'action de déconnexion pour rediriger l\'utilisateur vers le portail d\'accueil.
 - Outrepasse la société par défaut configurée sur la fiche utilisateur pour forcer la société sélectionnée lors du login.
     """,
-    'author': 'Odoo Developer',
-    'website': 'https://www.odoo.com',
+    'author': 'ATTALA',
     'category': 'Website',
-    'depends': [
-        'web',
-        'portal',
-        'mobach_config',
-    ],
+    'depends': ['web', 'portal', 'mobach_config'],
     'data': [
+        'security/ir.model.access.csv',
+        'views/res_company_views.xml',
         'views/portal_templates.xml',
+        'data/company_portal_data.xml',
     ],
     'installable': True,
     'application': True,
