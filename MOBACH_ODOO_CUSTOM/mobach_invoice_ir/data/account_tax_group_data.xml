@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!--
+        Groupes de taxes IR dédiés.
+        Chaque taux IR a son propre groupe pour un affichage séparé
+        dans la zone totaux (widget tax_totals).
+
+        sequence élevée → ils apparaissent APRÈS les groupes TVA natifs.
+    -->
+
+    <record id="tax_group_ir_2_2" model="account.tax.group">
+        <field name="name">IR 2,2%</field>
+        <field name="sequence">90</field>
+    </record>
+
+    <record id="tax_group_ir_5_5" model="account.tax.group">
+        <field name="name">IR 5,5%</field>
+        <field name="sequence">91</field>
+    </record>
+
+</odoo>
