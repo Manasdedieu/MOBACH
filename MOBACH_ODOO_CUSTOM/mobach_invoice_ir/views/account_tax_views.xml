@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Champ is_withholding_ir dans le formulaire de la taxe -->
+    <record id="view_tax_form_mobach_ir" model="ir.ui.view">
+        <field name="name">account.tax.form.mobach.ir</field>
+        <field name="model">account.tax</field>
+        <field name="inherit_id" ref="account.view_tax_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='active']" position="after">
+                <field name="is_withholding_ir"
+                       string="Retenue IR (SYSCOHADA)"
+                       help="Identifie cette taxe comme retenue IR. Elle sera proposée dans l'en-tête des factures."/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Colonne is_withholding_ir dans la vue liste des taxes (ID Odoo 19 = view_tax_tree) -->
+    <record id="view_tax_tree_mobach_ir" model="ir.ui.view">
+        <field name="name">account.tax.tree.mobach.ir</field>
+        <field name="model">account.tax</field>
+        <field name="inherit_id" ref="account.view_tax_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='active']" position="after">
+                <field name="is_withholding_ir" string="Retenue IR" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

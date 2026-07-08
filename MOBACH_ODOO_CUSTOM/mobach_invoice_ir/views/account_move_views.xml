@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Vue formulaire facture — MOBACH IR
+        ===================================
+        Seul ajout : le champ ir_tax_id dans le groupe gauche de l'en-tête,
+        sous le partenaire. On ne touche PAS au widget tax_totals (patché via JS).
+    -->
+    <record id="view_move_form_mobach_ir" model="ir.ui.view">
+        <field name="name">account.move.form.mobach.ir</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Champ IR dans l'en-tête, groupe gauche, sous le partenaire -->
+            <group id="header_left_group" position="inside">
+                <label for="ir_tax_id"
+                       string="Taxe IR (Retenue)"
+                       invisible="move_type not in ('out_invoice','out_refund')"/>
+                <field name="ir_tax_id"
+                       nolabel="1"
+                       invisible="move_type not in ('out_invoice','out_refund')"
+                       readonly="state != 'draft'"
+                       options="{'no_create': True, 'no_open': True}"
+                       placeholder="Sélectionner IR applicable (optionnel)…"/>
+            </group>
+
+            <!-- Champs invisibles nécessaires (déclenchent le recalcul tax_totals) -->
+            <field name="id" position="after">
+                <field name="ir_tax_id" invisible="1"/>
+                <field name="ir_amount" invisible="1"/>
+                <field name="amount_net_mandate" invisible="1"/>
+            </field>
+
+        </field>
+    </record>
+
+</odoo>

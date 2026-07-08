@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+
+    <!--
+        Patch OWL du template account.TaxTotalsField.
+
+        On cible le <tr> du "Total" (identifiable car c'est le seul <tr>
+        qui n'est PAS dans un t-foreach et qui contient le span name="amount_total").
+
+        Insertions AVANT ce <tr> :
+          1. Ligne IR (si has_ir)
+          2. Ligne Net à Mandater (si has_ir)
+
+        Remplacement du libellé "Total" par "Total TTC".
+
+        Résultat final :
+          Total HT           10 000 000
+          TVA 19,25%          1 925 000
+          ─────────────────────────────
+          IR 2,2%               220 000
+          ═════════════════════════════
+          Net à Mandater      9 780 000
+          ─────────────────────────────
+          Total TTC          11 925 000
+    -->
+    <t t-name="mobach_invoice_ir.TaxTotalsIRPatch"
+       t-inherit="account.TaxTotalsField"
+       t-inherit-mode="extension">
+
+        <!--
+            XPath sur le <tr> contenant le span[name="amount_total"].
+            C'est le marqueur le plus fiable du bloc "Total" dans le template natif.
+        -->
+        <xpath expr="//tr[.//span[@name='amount_total']]" position="before">
+            <t t-if="irData.hasIr">
+
+                <!-- Séparateur visuel -->
+                <tr>
+                    <td colspan="2">
+                        <div style="border-top: 1px solid #dee2e6; margin: 2px 0;"/>
+                    </td>
+                </tr>
+
+                <!-- Ligne IR -->
+                <tr>
+                    <td class="o_td_label">
+                        <label class="o_form_label o_tax_total_label"
+                               style="color: #6c757d;">
+                            <t t-out="irData.taxName"/>
+                        </label>
+                    </td>
+                    <td class="o_list_monetary">
+                        <span dir="ltr"
+                              style="white-space: nowrap; color: #6c757d;"
+                              t-out="formatIRAmount(irData.irAmount)"/>
+                    </td>
+                </tr>
+
+                <!-- Séparateur fort avant Net à Mandater -->
+                <tr>
+                    <td colspan="2">
+                        <div style="border-top: 2px solid #adb5bd; margin: 2px 0;"/>
+                    </td>
+                </tr>
+
+                <!-- Ligne Net à Mandater -->
+                <tr>
+                    <td class="o_td_label">
+                        <label class="o_form_label o_tax_total_label"
+                               style="font-weight: bold;">
+                            Net à Mandater
+                        </label>
+                    </td>
+                    <td class="o_list_monetary">
+                        <span dir="ltr"
+                              style="white-space: nowrap; font-weight: bold;"
+                              t-out="formatIRAmount(irData.netMandate)"/>
+                    </td>
+                </tr>
+
+                <!-- Séparateur avant Total TTC -->
+                <tr>
+                    <td colspan="2">
+                        <div style="border-top: 1px solid #dee2e6; margin: 2px 0;"/>
+                    </td>
+                </tr>
+
+            </t>
+        </xpath>
+
+          <!-- Remplacement du libellé "Total" → "Total TTC" -->
+        <xpath expr="//tr[.//span[@name='amount_total']]//label" position="replace">
+            <label class="o_form_label o_tax_total_label">Total TTC</label>
+        </xpath>
+    </t>
+
+</templates>
