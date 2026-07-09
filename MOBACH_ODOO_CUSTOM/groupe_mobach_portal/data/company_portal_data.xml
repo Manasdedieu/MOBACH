@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!--
+    ╔══════════════════════════════════════════════════════════════════╗
+    ║  noupdate="1" : chargé UNE SEULE FOIS à l'installation.         ║
+    ║  Après installation, l'administrateur peut librement changer     ║
+    ║  le logo via Odoo > Paramètres > Sociétés.                       ║
+    ║  Le portail reflétera immédiatement le nouveau logo (le          ║
+    ║  cache-busting par write_date garantit l'affichage instantané).  ║
+    ║                                                                  ║
+    ║  Pour remplacer les logos placeholder :                          ║
+    ║  → Déposez vos images dans static/src/img/ sous les noms :       ║
+    ║      logo_mobach.svg / logo_mobach.jpeg                          ║
+    ║      logo_mb_sarl.svg / logo_mohamadou_bachirou_sarl.jpeg        ║
+    ║  → Désinstallez puis réinstallez le module (noupdate="1").       ║
+    ║    OU changez le logo directement dans Odoo (recommandé).        ║
+    ╚══════════════════════════════════════════════════════════════════╝
+    -->
+
+    <!-- ── MOBACH SARL ─────────────────────────────────────────────── -->
+    <record id="base.main_company" model="res.company">
+        <field name="portal_description">Prestation de Services &amp; Commerce Général</field>
+        <field name="logo" type="base64"
+               file="groupe_mobach_portal/static/src/img/logo_mobach.jpeg"/>
+    </record>
+
+    <!-- ── NAS ET FILS ─────────────────────────────────────────────── -->
+    <record id="mobach_config.company_nas_et_fils" model="res.company">
+        <field name="portal_description">Prestation de Services &amp; Commerce Général</field>
+        <field name="logo" type="base64"
+               file="groupe_mobach_portal/static/src/img/logo_nasetfils.jpeg"/>
+    </record>
+
+    <!-- ── MB SARL ─────────────────────────────────────────────────── -->
+    <record id="mobach_config.company_mohamadou_bachirou" model="res.company">
+        <field name="portal_description">Prestation de Services &amp; Commerce Général</field>
+        <field name="logo" type="base64"
+               file="groupe_mobach_portal/static/src/img/logo_mohamadou_bachirou_sarl.jpeg"/>
+    </record>
+
+    <!-- ── AFRI DRIVE ───────────────────────────────────────────────── -->
+    <record id="mobach_config.company_afridrive" model="res.company">
+        <field name="portal_description">Logistique &amp; Transport</field>
+        <field name="logo" type="base64"
+               file="groupe_mobach_portal/static/src/img/logo_afridrive.jpeg"/>
+    </record>
+
+</odoo>
