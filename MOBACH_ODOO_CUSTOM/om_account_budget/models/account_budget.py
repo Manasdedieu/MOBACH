@@ -82,8 +82,8 @@ class CrossoveredBudgetLines(models.Model):
     analytic_account_id = fields.Many2one('account.analytic.account', 'Analytic Account')
     analytic_plan_id = fields.Many2one(related='analytic_account_id.plan_id')
     general_budget_id = fields.Many2one('account.budget.post', 'Budgetary Position')
-    date_from = fields.Date('Start Date', required=True)
-    date_to = fields.Date('End Date', required=True)
+    date_from = fields.Date('Start Date', required=True, default=fields.Date.today())
+    date_to = fields.Date('End Date', required=True, default=fields.Date.today())
     paid_date = fields.Date('Paid Date')
     currency_id = fields.Many2one('res.currency', related='company_id.currency_id', readonly=True)
     planned_amount = fields.Monetary(

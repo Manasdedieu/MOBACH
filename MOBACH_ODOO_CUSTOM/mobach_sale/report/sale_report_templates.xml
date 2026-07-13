@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="mobach_sale_report_saleorder_document" inherit_id="sale.report_saleorder_document">
+        <xpath expr="//t[@t-set='layout_document_title']" position="replace">
+            <t t-set="layout_document_title"/>
+        </xpath>
+
+        <xpath expr="//t[@t-set='layout_document_title']" position="before">
+            <h2 class="d-block w-100 text-center mb-3" id="informations">
+                <span t-if="is_proforma">Pro-Forma Invoice # </span>
+                <span t-elif="doc.state in ['draft','sent']">Quotation # </span>
+                <span t-else="">Order # </span>
+                <span t-field="doc.name">SO0000</span>
+            </h2>
+        </xpath>
+        <xpath expr="//t[@t-set='layout_document_title']" position="after">
+            <div class="row col-sm-12 ml-auto d-flex">
+                <div style="width: 60%" class="text-left mb-3">
+                    <span class="mb-2"><strong style="border-bottom: 2px solid;">Objet :</strong> <span class="ms-2" t-field="doc.object"/></span>
+                </div>
+                <div style="width: 40%"/>
+            </div>
+        </xpath>
+        <xpath expr="//div[@id='informations']" position="replace"/>
+<!--            <div id="informations"/>-->
+<!--        </xpath>-->
+<!--        <xpath expr="//div[@id='informations']" position="attributes">-->
+<!--            <attribute name="style" add="visibility: hidden !important" separator=" "/>-->
+<!--        </xpath>-->
+    </template>
+</odoo>

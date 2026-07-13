@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!--
+        Taxes IR pré-configurées pour le Cameroun (SYSCOHADA).
+        type_tax_use="none" → usage interne uniquement, ne s'ajoutent
+        pas automatiquement sur les lignes de facture.
+    -->
+
+    <!-- IR 2,2% — retenue sur marchés, travaux, prestations de services -->
+    <record id="tax_ir_2_2" model="account.tax">
+        <field name="name">IR 2,2%</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">2.2</field>
+        <field name="type_tax_use">none</field>
+        <field name="tax_group_id" ref="tax_group_ir_2_2"/>
+        <field name="is_withholding_ir">True</field>
+        <field name="description">IR 2,2%</field>
+        <field name="active">True</field>
+    </record>
+
+    <!-- IR 5,5% — autres retenues à la source -->
+    <record id="tax_ir_5_5" model="account.tax">
+        <field name="name">IR 5,5%</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">5.5</field>
+        <field name="type_tax_use">none</field>
+        <field name="tax_group_id" ref="tax_group_ir_5_5"/>
+        <field name="is_withholding_ir">True</field>
+        <field name="description">IR 5,5%</field>
+        <field name="active">True</field>
+    </record>
+
+</odoo>
