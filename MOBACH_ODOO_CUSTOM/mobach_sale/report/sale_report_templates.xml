@@ -13,19 +13,95 @@
                 <span t-field="doc.name">SO0000</span>
             </h2>
         </xpath>
+
         <xpath expr="//t[@t-set='layout_document_title']" position="after">
             <div class="row col-sm-12 ml-auto d-flex">
                 <div style="width: 60%" class="text-left mb-3">
-                    <span class="mb-2"><strong style="border-bottom: 2px solid;">Objet :</strong> <span class="ms-2" t-field="doc.object"/></span>
+                    <span class="mb-2">
+                        <strong style="border-bottom: 2px solid;">Objet :</strong>
+                        <span class="ms-2" t-field="doc.object"/>
+                    </span>
                 </div>
                 <div style="width: 40%"/>
             </div>
         </xpath>
+
         <xpath expr="//div[@id='informations']" position="replace"/>
-<!--            <div id="informations"/>-->
-<!--        </xpath>-->
-<!--        <xpath expr="//div[@id='informations']" position="attributes">-->
-<!--            <attribute name="style" add="visibility: hidden !important" separator=" "/>-->
-<!--        </xpath>-->
+    </template>
+
+    <!--
+        Rapport PDF Devis — MOBACH IR
+        ==============================
+        Héritage de sale.document_tax_totals (template Odoo 19 pour devis).
+
+        Dans le contexte du rapport de devis, la variable est "doc" (sale.order).
+        On utilise donc doc.ir_tax_id, doc.ir_amount, doc.amount_net_mandate.
+
+        Ordre final dans le PDF :
+          Total HT           10 000 000
+          TVA 19,25%          1 925 000
+          ─────────────────────────────
+          IR 2,2%               220 000
+          Net à Mandater      9 780 000
+          ─────────────────────────────
+          Total TTC          11 925 000
+    -->
+    <template id="document_tax_totals_mobach_sale_ir"
+              inherit_id="sale.document_tax_totals"
+              name="MOBACH — IR, Net à Mandater et Total TTC Devis (PDF)">
+
+        <!-- Injection IR + Net à Mandater avant la ligne Total -->
+        <xpath expr="//tr[hasclass('o_total')]" position="before">
+            <t t-if="doc and doc.ir_tax_id">
+
+                <!-- Ligne séparatrice -->
+                <tr>
+                    <td colspan="2" style="padding: 0;">
+                        <hr style="margin: 3px 0; border-color: #dee2e6;"/>
+                    </td>
+                </tr>
+
+                <!-- IR -->
+                <tr>
+                    <td style="color: #6c757d;">
+                        <t t-out="doc.ir_tax_id.name"/>
+                    </td>
+                    <td class="text-end" style="color: #6c757d;">
+                        <span t-out="doc.ir_amount"
+                              t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                    </td>
+                </tr>
+
+                <!-- Séparateur fort -->
+                <tr>
+                    <td colspan="2" style="padding: 0;">
+                        <hr style="margin: 3px 0; border-color: #adb5bd; border-width: 2px;"/>
+                    </td>
+                </tr>
+
+                <!-- Net à Mandater -->
+                <tr>
+                    <td><strong>Net à Mandater</strong></td>
+                    <td class="text-end">
+                        <strong t-out="doc.amount_net_mandate"
+                                t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                    </td>
+                </tr>
+
+                <!-- Séparateur avant Total TTC -->
+                <tr>
+                    <td colspan="2" style="padding: 0;">
+                        <hr style="margin: 3px 0; border-color: #dee2e6;"/>
+                    </td>
+                </tr>
+
+            </t>
+        </xpath>
+
+        <!-- "Total" → "Total TTC" dans le PDF -->
+        <xpath expr="//tr[hasclass('o_total')]/td[1]" position="replace">
+            <td><strong>Total TTC</strong></td>
+        </xpath>
+
     </template>
 </odoo>
