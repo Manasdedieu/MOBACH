@@ -6,11 +6,21 @@
         <field name="model">sale.order</field>
         <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="arch" type="xml">
+
+            <!-- Champs Objet et IR dans l'en-tête -->
             <group name="partner_details" position="inside">
                 <field name="object" required="1"/>
+                <label for="ir_tax_id" string="Taxe IR (Retenue)"/>
+                <field name="ir_tax_id"
+                       nolabel="1"
+                       options="{'no_create': True, 'no_open': True}"
+                       placeholder="Sélectionner IR applicable (optionnel)…"/>
+                <!-- Champs invisibles pour déclencher le recalcul du widget totaux -->
+                <field name="ir_amount" invisible="1"/>
+                <field name="amount_net_mandate" invisible="1"/>
             </group>
+
         </field>
     </record>
-
 
 </odoo>

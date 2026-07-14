@@ -7,7 +7,7 @@
         <field name="inherit_id" ref="hr.view_employee_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='parent_id']" position="after">
-                <label for="object" class="text-nowrap"/>
+                <label for="start_date" class="text-nowrap"/>
                 <div>
                     <field name="start_date"/>
                 </div>
