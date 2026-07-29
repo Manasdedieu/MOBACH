@@ -28,6 +28,12 @@
         'l10n_syscohada',
         'muk_web_theme',
         'om_account_accountant',
+        'mobach_sale',
+        'mobach_purchase',
+        'mobach_invoice',
+        'mobach_invoice_ir',
+        'mobach_global_tax',
+        'groupe_mobach_portal',
     ],
     'data': [
         'views/res_company_views.xml',
