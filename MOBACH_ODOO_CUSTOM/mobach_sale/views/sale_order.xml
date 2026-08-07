@@ -10,6 +10,7 @@
             <!-- Champs Objet et IR dans l'en-tête -->
             <group name="partner_details" position="inside">
                 <field name="object" required="1"/>
+                <field name="currency_id" options="{'no_create': True, 'no_open': True}"/>
                 <label for="ir_tax_id" string="Taxe IR (Retenue)"/>
                 <field name="ir_tax_id"
                        nolabel="1"
@@ -18,6 +19,7 @@
                 <!-- Champs invisibles pour déclencher le recalcul du widget totaux -->
                 <field name="ir_amount" invisible="1"/>
                 <field name="amount_net_mandate" invisible="1"/>
+                <field name="ui_last_currency_id" invisible="1"/>
             </group>
 
         </field>
