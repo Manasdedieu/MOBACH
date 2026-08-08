@@ -33,7 +33,6 @@
         'mobach_invoice',
         'mobach_invoice_ir',
         'mobach_global_tax',
-        'groupe_mobach_portal',
     ],
     'data': [
         'views/res_company_views.xml',
