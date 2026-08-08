@@ -10,7 +10,9 @@
     'data': [
         'security/ir.model.access.csv',
         'data/account_tax_group_data.xml',
+        'data/account_tax_group_other_companies_data.xml',
         'data/account_tax_data.xml',
+        'data/account_tax_other_companies_data.xml',
         'views/account_tax_views.xml',
         'views/account_move_views.xml',
         'report/report_invoice_ir.xml',

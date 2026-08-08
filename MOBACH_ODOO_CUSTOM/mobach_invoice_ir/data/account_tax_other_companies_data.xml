@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <!-- ============================================== -->
+    <!-- TAXES POUR NAS ET FILS SARL                    -->
+    <!-- ============================================== -->
+    <record id="tax_tva_19_25_vente_nas" model="account.tax">
+        <field name="name">TVA 19,25% (Vente)</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">19.25</field>
+        <field name="type_tax_use">sale</field>
+        <field name="tax_group_id" ref="tax_group_tva_19_25_nas"/>
+        <field name="description">TVA 19,25%</field>
+        <field name="company_id" ref="mobach_config.company_nas_et_fils"/>
+        <field name="country_id" ref="base.cm"/>
+        <field name="active">True</field>
+    </record>
+
+    <record id="tax_tva_19_25_achat_nas" model="account.tax">
+        <field name="name">TVA 19,25% (Achat)</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">19.25</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_tva_19_25_nas"/>
+        <field name="description">TVA 19,25%</field>
+        <field name="company_id" ref="mobach_config.company_nas_et_fils"/>
+        <field name="country_id" ref="base.cm"/>
+        <field name="active">True</field>
+    </record>
+
+    <record id="tax_ir_2_2_nas" model="account.tax">
+        <field name="name">IR 2,2%</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">2.2</field>
+        <field name="type_tax_use">none</field>
+        <field name="tax_group_id" ref="tax_group_ir_2_2_nas"/>
+        <field name="is_withholding_ir">True</field>
+        <field name="description">IR 2,2%</field>
+        <field name="company_id" ref="mobach_config.company_nas_et_fils"/>
+        <field name="country_id" ref="base.cm"/>
+        <field name="active">True</field>
+    </record>
+
+    <record id="tax_ir_5_5_nas" model="account.tax">
+        <field name="name">IR 5,5%</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">5.5</field>
+        <field name="type_tax_use">none</field>
+        <field name="tax_group_id" ref="tax_group_ir_5_5_nas"/>
+        <field name="is_withholding_ir">True</field>
+        <field name="description">IR 5,5%</field>
+        <field name="company_id" ref="mobach_config.company_nas_et_fils"/>
+        <field name="country_id" ref="base.cm"/>
+        <field name="active">True</field>
+    </record>
+
+    <!-- ============================================== -->
+    <!-- TAXES POUR MOHAMADOU BACHIROU SARL             -->
+    <!-- ============================================== -->
+    <record id="tax_tva_19_25_vente_mb" model="account.tax">
+        <field name="name">TVA 19,25% (Vente)</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">19.25</field>
+        <field name="type_tax_use">sale</field>
+        <field name="tax_group_id" ref="tax_group_tva_19_25_mb"/>
+        <field name="description">TVA 19,25%</field>
+        <field name="company_id" ref="mobach_config.company_mohamadou_bachirou"/>
+        <field name="country_id" ref="base.cm"/>
+        <field name="active">True</field>
+    </record>
+
+    <record id="tax_tva_19_25_achat_mb" model="account.tax">
+        <field name="name">TVA 19,25% (Achat)</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">19.25</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_tva_19_25_mb"/>
+        <field name="description">TVA 19,25%</field>
+        <field name="company_id" ref="mobach_config.company_mohamadou_bachirou"/>
+        <field name="country_id" ref="base.cm"/>
+        <field name="active">True</field>
+    </record>
+
+    <record id="tax_ir_2_2_mb" model="account.tax">
+        <field name="name">IR 2,2%</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">2.2</field>
+        <field name="type_tax_use">none</field>
+        <field name="tax_group_id" ref="tax_group_ir_2_2_mb"/>
+        <field name="is_withholding_ir">True</field>
+        <field name="description">IR 2,2%</field>
+        <field name="company_id" ref="mobach_config.company_mohamadou_bachirou"/>
+        <field name="country_id" ref="base.cm"/>
+        <field name="active">True</field>
+    </record>
+
+    <record id="tax_ir_5_5_mb" model="account.tax">
+        <field name="name">IR 5,5%</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">5.5</field>
+        <field name="type_tax_use">none</field>
+        <field name="tax_group_id" ref="tax_group_ir_5_5_mb"/>
+        <field name="is_withholding_ir">True</field>
+        <field name="description">IR 5,5%</field>
+        <field name="company_id" ref="mobach_config.company_mohamadou_bachirou"/>
+        <field name="country_id" ref="base.cm"/>
+        <field name="active">True</field>
+    </record>
+
+    <!-- ============================================== -->
+    <!-- TAXES POUR AFRIDRIVE SARL                      -->
+    <!-- ============================================== -->
+    <record id="tax_tva_19_25_vente_afridrive" model="account.tax">
+        <field name="name">TVA 19,25% (Vente)</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">19.25</field>
+        <field name="type_tax_use">sale</field>
+        <field name="tax_group_id" ref="tax_group_tva_19_25_afridrive"/>
+        <field name="description">TVA 19,25%</field>
+        <field name="company_id" ref="mobach_config.company_afridrive"/>
+        <field name="country_id" ref="base.cm"/>
+        <field name="active">True</field>
+    </record>
+
+    <record id="tax_tva_19_25_achat_afridrive" model="account.tax">
+        <field name="name">TVA 19,25% (Achat)</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">19.25</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="tax_group_id" ref="tax_group_tva_19_25_afridrive"/>
+        <field name="description">TVA 19,25%</field>
+        <field name="company_id" ref="mobach_config.company_afridrive"/>
+        <field name="country_id" ref="base.cm"/>
+        <field name="active">True</field>
+    </record>
+
+    <record id="tax_ir_2_2_afridrive" model="account.tax">
+        <field name="name">IR 2,2%</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">2.2</field>
+        <field name="type_tax_use">none</field>
+        <field name="tax_group_id" ref="tax_group_ir_2_2_afridrive"/>
+        <field name="is_withholding_ir">True</field>
+        <field name="description">IR 2,2%</field>
+        <field name="company_id" ref="mobach_config.company_afridrive"/>
+        <field name="country_id" ref="base.cm"/>
+        <field name="active">True</field>
+    </record>
+
+    <record id="tax_ir_5_5_afridrive" model="account.tax">
+        <field name="name">IR 5,5%</field>
+        <field name="amount_type">percent</field>
+        <field name="amount">5.5</field>
+        <field name="type_tax_use">none</field>
+        <field name="tax_group_id" ref="tax_group_ir_5_5_afridrive"/>
+        <field name="is_withholding_ir">True</field>
+        <field name="description">IR 5,5%</field>
+        <field name="company_id" ref="mobach_config.company_afridrive"/>
+        <field name="country_id" ref="base.cm"/>
+        <field name="active">True</field>
+    </record>
+
+</odoo>

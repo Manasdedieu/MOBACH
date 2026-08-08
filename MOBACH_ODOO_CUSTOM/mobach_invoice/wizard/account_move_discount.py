@@ -136,14 +136,10 @@ class AccountMoveDiscount(models.TransientModel):
             computation_key=f'global_discount,{self.id}',
             grouping_function=grouping_function,
         )
-        _logger.info(f"\n\n\n\n\n\n\n\n\n\n\n\n\n  global_discount_base_lines ===> {global_discount_base_lines}\n\n\n\n\n\n\n\n\n\n\n\n")
-
         commands = [
             Command.create(values)
             for values in self._prepare_global_discount_move_lines(global_discount_base_lines)
         ]
-        _logger.info(f"\n\n\n\n\n\n\n\n\n\n\n\n\n  commande ===> {self._prepare_global_discount_move_lines(global_discount_base_lines)}\n\n\n\n\n\n\n\n\n\n\n\n")
-        _logger.info(f"\n\n\n\n\n\n\n\n\n\n\n\n\n  global_discount_base_lines ===> {global_discount_base_lines}\n\n\n\n\n\n\n\n\n\n\n\n")
         if commands:
             move.with_context(check_move_validity=False).write({'invoice_line_ids': commands})
 
@@ -154,7 +150,6 @@ class AccountMoveDiscount(models.TransientModel):
         
         if self.discount_type == 'line_discount':
             # On applique le pourcentage dans la colonne '% Remise' de chaque ligne
-            _logger.info("\n\n\n\n\nteste\n\n\n\n")
             self.move_id.invoice_line_ids.write({'discount': self.discount_percentage * 100.0})
         else:
             self._create_discount_lines()
