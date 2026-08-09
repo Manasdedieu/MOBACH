@@ -86,6 +86,34 @@
                 </tr>
 
             </t>
+            
+            <t t-if="irData.hasRetenue">
+                <!-- Séparateur -->
+                <tr>
+                    <td colspan="2">
+                        <div style="border-top: 1px dashed #dee2e6; margin: 2px 0;"/>
+                    </td>
+                </tr>
+                <!-- Ligne Retenue sur Solde -->
+                <tr>
+                    <td class="o_td_label">
+                        <label class="o_form_label o_tax_total_label" style="font-weight: bold; color: #856404;">
+                            Retenue sur Solde
+                        </label>
+                    </td>
+                    <td class="o_list_monetary">
+                        <span dir="ltr"
+                              style="white-space: nowrap; font-weight: bold; color: #856404;"
+                              t-out="formatIRAmount(irData.retenueAmount)"/>
+                    </td>
+                </tr>
+                <!-- Séparateur avant Total TTC -->
+                <tr>
+                    <td colspan="2">
+                        <div style="border-top: 1px solid #dee2e6; margin: 2px 0;"/>
+                    </td>
+                </tr>
+            </t>
         </xpath>
 
           <!-- Remplacement du libellé "Total" → "Total TTC" -->

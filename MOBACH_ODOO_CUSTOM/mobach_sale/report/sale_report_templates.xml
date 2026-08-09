@@ -96,6 +96,31 @@
                 </tr>
 
             </t>
+            
+            <t t-if="doc and doc.retenue_amount > 0">
+                <!-- Ligne séparatrice -->
+                <tr>
+                    <td colspan="2" style="padding: 0;">
+                        <hr style="margin: 3px 0; border-top: 1px dashed #dee2e6;"/>
+                    </td>
+                </tr>
+
+                <!-- Retenue sur Solde -->
+                <tr>
+                    <td style="color: #856404;"><strong>Retenue sur Solde</strong></td>
+                    <td class="text-end" style="color: #856404;">
+                        <strong t-out="doc.retenue_amount"
+                                t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                    </td>
+                </tr>
+
+                <!-- Séparateur avant Total TTC -->
+                <tr>
+                    <td colspan="2" style="padding: 0;">
+                        <hr style="margin: 3px 0; border-color: #dee2e6;"/>
+                    </td>
+                </tr>
+            </t>
         </xpath>
 
         <!-- "Total" → "Total TTC" dans le PDF -->
