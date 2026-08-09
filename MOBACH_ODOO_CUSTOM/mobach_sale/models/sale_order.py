@@ -37,6 +37,13 @@ class SaleOrder(models.Model):
         help="Net à Mandater = Total HT − IR",
     )
 
+    retenue_amount = fields.Monetary(
+        string='Retenue sur Solde',
+        currency_field='currency_id',
+        compute='_compute_retenue_amount',
+        store=True,
+    )
+
     # Ce champ caché permet de mémoriser la dernière devise affichée à l'écran par l'utilisateur.
     ui_last_currency_id = fields.Many2one('res.currency', string="Last UI Currency", copy=False)
 
@@ -73,6 +80,22 @@ class SaleOrder(models.Model):
             order.ir_amount = ir_amt
             order.amount_net_mandate = order.amount_untaxed - ir_amt
 
+    @api.depends('payment_term_id', 'payment_term_id.is_retenue', 'amount_total')
+    def _compute_retenue_amount(self):
+        for order in self:
+            if order.payment_term_id and order.payment_term_id.is_retenue and order.amount_total:
+                immediate_percent = 0.0
+                for line in order.payment_term_id.line_ids:
+                    if getattr(line, 'nb_days', 0) == 0:
+                        if line.value == 'percent':
+                            immediate_percent += line.value_amount
+                        elif line.value == 'fixed':
+                            immediate_percent += (line.value_amount / order.amount_total * 100)
+                retenue_percent = max(0, 100.0 - immediate_percent)
+                order.retenue_amount = (order.amount_total * retenue_percent) / 100.0
+            else:
+                order.retenue_amount = 0.0
+
     def _prepare_invoice(self):
         result = super()._prepare_invoice()
         if self.object:
@@ -81,7 +104,7 @@ class SaleOrder(models.Model):
             result.update({'ir_tax_id': self.ir_tax_id.id})
         return result
 
-    @api.depends('ir_tax_id', 'ir_amount', 'amount_net_mandate')
+    @api.depends('ir_tax_id', 'ir_amount', 'amount_net_mandate', 'retenue_amount')
     def _compute_tax_totals(self):
         super()._compute_tax_totals()
         for order in self:
@@ -92,4 +115,5 @@ class SaleOrder(models.Model):
             )
             order.tax_totals['ir_amount'] = order.ir_amount
             order.tax_totals['amount_net_mandate'] = order.amount_net_mandate
+            order.tax_totals['retenue_amount'] = order.retenue_amount
             order.tax_totals['has_ir'] = bool(order.ir_tax_id)
