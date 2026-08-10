@@ -24,14 +24,16 @@ patch(TaxTotalsComponent.prototype, {
      */
     get irData() {
         const t = this.totals;
-        if (!t || !t.has_ir) {
-            return { hasIr: false, taxName: '', irAmount: 0, netMandate: 0 };
+        if (!t || (!t.has_ir && !t.retenue_amount)) {
+            return { hasIr: false, taxName: '', irAmount: 0, netMandate: 0, hasRetenue: false, retenueAmount: 0 };
         }
         return {
-            hasIr: true,
+            hasIr: !!t.has_ir,
             taxName: t.ir_tax_name || '',
             irAmount: t.ir_amount || 0,
             netMandate: t.amount_net_mandate || 0,
+            hasRetenue: !!t.retenue_amount,
+            retenueAmount: t.retenue_amount || 0,
         };
     },
 

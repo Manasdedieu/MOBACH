@@ -53,6 +53,19 @@ class AccountMove(models.Model):
         help="Net à Mandater = Total HT − IR",
     )
 
+    retenue_amount = fields.Monetary(
+        string='Retenue sur Solde',
+        currency_field='currency_id',
+        compute='_compute_retenue_amount',
+        store=True,
+    )
+    
+    retenue_date = fields.Date(
+        string='Date Retenue',
+        compute='_compute_retenue_amount',
+        store=True,
+    )
+
     # ------------------------------------------------------------------
     # Calcul IR / Net à Mandater
     # ------------------------------------------------------------------
@@ -68,10 +81,34 @@ class AccountMove(models.Model):
             move.amount_net_mandate = move.amount_untaxed - ir_amt
 
     # ------------------------------------------------------------------
+    # Calcul Retenue sur Solde
+    # ------------------------------------------------------------------
+
+    @api.depends('line_ids', 'line_ids.date_maturity', 'invoice_date', 'date', 'amount_total', 'invoice_payment_term_id', 'invoice_payment_term_id.is_retenue')
+    def _compute_retenue_amount(self):
+        for move in self:
+            if move.is_invoice(include_receipts=True) and move.invoice_payment_term_id and move.invoice_payment_term_id.is_retenue:
+                # Utiliser la date de facture, sinon la date comptable, sinon aujourd'hui
+                ref_date = move.invoice_date or move.date or fields.Date.context_today(move)
+                # Les lignes de type 'payment_term' qui ont une date d'échéance supérieure à la date de référence
+                delayed_lines = move.line_ids.filtered(
+                    lambda l: l.display_type == 'payment_term' and l.date_maturity and l.date_maturity > ref_date
+                )
+                move.retenue_amount = abs(sum(delayed_lines.mapped('amount_currency')))
+                # La date de la retenue est la date d'échéance la plus proche parmi les différées (ou la plus lointaine, on prend la min)
+                if delayed_lines:
+                    move.retenue_date = min(delayed_lines.mapped('date_maturity'))
+                else:
+                    move.retenue_date = False
+            else:
+                move.retenue_amount = 0.0
+                move.retenue_date = False
+
+    # ------------------------------------------------------------------
     # Injection dans tax_totals pour le widget JS
     # ------------------------------------------------------------------
 
-    @api.depends('ir_tax_id', 'ir_amount', 'amount_net_mandate')
+    @api.depends('ir_tax_id', 'ir_amount', 'amount_net_mandate', 'retenue_amount')
     def _compute_tax_totals(self):
         """
         On appelle le super() pour obtenir le dict tax_totals natif,
@@ -88,4 +125,6 @@ class AccountMove(models.Model):
             )
             move.tax_totals['ir_amount'] = move.ir_amount
             move.tax_totals['amount_net_mandate'] = move.amount_net_mandate
+            move.tax_totals['retenue_amount'] = move.retenue_amount
             move.tax_totals['has_ir'] = bool(move.ir_tax_id)
+
