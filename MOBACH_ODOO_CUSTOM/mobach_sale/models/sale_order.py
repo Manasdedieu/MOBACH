@@ -38,7 +38,7 @@ class SaleOrder(models.Model):
     )
 
     retenue_amount = fields.Monetary(
-        string='Retenue sur Solde',
+        string='Retenue de Garantie',
         currency_field='currency_id',
         compute='_compute_retenue_amount',
         store=True,
