@@ -15,6 +15,7 @@
         <field name="tax_group_id" ref="tax_group_ir_2_2"/>
         <field name="is_withholding_ir">True</field>
         <field name="description">IR 2,2%</field>
+        <field name="country_id" ref="base.cm"/>
         <field name="active">True</field>
     </record>
 
@@ -27,6 +28,7 @@
         <field name="tax_group_id" ref="tax_group_ir_5_5"/>
         <field name="is_withholding_ir">True</field>
         <field name="description">IR 5,5%</field>
+        <field name="country_id" ref="base.cm"/>
         <field name="active">True</field>
     </record>
 

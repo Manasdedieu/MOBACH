@@ -4,9 +4,9 @@
     'version': '19.0.2.0.0',
     'category': 'Sale',
     'summary': "Modification module vente",
-    'author': 'MOBACH',
+    'author': 'ATTALA',
     'website': 'https://www.mobach.cm',
-    'depends': ['mobach_config', 'mobach_invoice_ir', 'sale_management'],
+    'depends': ['mobach_invoice_ir', 'sale_management', 'mobach_invoice'],
     'data': [
         'security/ir.model.access.csv',
         'views/sale_order.xml',

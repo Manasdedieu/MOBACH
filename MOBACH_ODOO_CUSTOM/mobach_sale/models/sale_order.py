@@ -16,6 +16,12 @@ class SaleOrder(models.Model):
              "Ex : IR 2,2% ou IR 5,5%",
     )
 
+    currency_id = fields.Many2one(
+        'res.currency',
+        readonly=False,
+    )
+
+
     ir_amount = fields.Monetary(
         string='Montant IR',
         currency_field='currency_id',
@@ -30,6 +36,32 @@ class SaleOrder(models.Model):
         store=True,
         help="Net à Mandater = Total HT − IR",
     )
+
+    # Ce champ caché permet de mémoriser la dernière devise affichée à l'écran par l'utilisateur.
+    ui_last_currency_id = fields.Many2one('res.currency', string="Last UI Currency", copy=False)
+
+    @api.onchange('currency_id')
+    def _onchange_currency_id_convert_prices(self):
+        # On utilise le champ mémoire de l'UI en priorité. Sinon on prend la devise enregistrée en BD.
+        old_currency = self.ui_last_currency_id or self._origin.currency_id
+        new_currency = self.currency_id
+        
+        # Si la devise a changé, on applique la conversion sur les prix unitaires.
+        if old_currency and new_currency and old_currency != new_currency:
+            date = self.date_order or fields.Date.context_today(self)
+            
+            for line in self.order_line.filtered(lambda l: l.display_type in ('product', False, '')):
+                if line.price_unit:
+                    new_price = old_currency._convert(
+                        line.price_unit, 
+                        new_currency, 
+                        self.company_id, 
+                        date
+                    )
+                    line.price_unit = new_price
+            
+            # On met à jour la mémoire de l'UI pour un éventuel changement consécutif sans sauvegarde.
+            self.ui_last_currency_id = new_currency
 
     @api.depends('amount_untaxed', 'ir_tax_id', 'ir_tax_id.amount')
     def _compute_ir_amounts(self):
@@ -61,4 +93,3 @@ class SaleOrder(models.Model):
             order.tax_totals['ir_amount'] = order.ir_amount
             order.tax_totals['amount_net_mandate'] = order.amount_net_mandate
             order.tax_totals['has_ir'] = bool(order.ir_tax_id)
-
