@@ -54,7 +54,7 @@ class AccountMove(models.Model):
     )
 
     retenue_amount = fields.Monetary(
-        string='Retenue sur Solde',
+        string='Retenue de Garantie',
         currency_field='currency_id',
         compute='_compute_retenue_amount',
         store=True,
@@ -81,7 +81,7 @@ class AccountMove(models.Model):
             move.amount_net_mandate = move.amount_untaxed - ir_amt
 
     # ------------------------------------------------------------------
-    # Calcul Retenue sur Solde
+    # Calcul Retenue de Garantie
     # ------------------------------------------------------------------
 
     @api.depends('line_ids', 'line_ids.date_maturity', 'invoice_date', 'date', 'amount_total', 'invoice_payment_term_id', 'invoice_payment_term_id.is_retenue')
