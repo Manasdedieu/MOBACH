@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_company_form_inherit_financial_performance" model="ir.ui.view">
+            <field name="name">res.company.form.inherit.financial.performance</field>
+            <field name="model">res.company</field>
+            <field name="inherit_id" ref="base.view_company_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//notebook" position="inside">
+                    <page string="Performance Financière (SYSCOHADA)" name="financial_kpis"
+                          groups="account.group_account_readonly,account.group_account_invoice">
+                        <div class="alert alert-secondary" role="alert">
+                            Indicateurs calculés sur <b>l'intégralité de l'historique</b> de la société.
+                            Pour une analyse par période, utilisez
+                            <i>Comptabilité &gt; Analyse &gt; Performance Financière</i>.
+                        </div>
+                        <group>
+                            <group string="Ventes — Ce qui a été soldé">
+                                <field name="ca_realise" widget="monetary"/>
+                                <field name="ca_encaisse_cash" widget="monetary"/>
+                                <field name="ca_compense_avoir" widget="monetary"/>
+                                <field name="ca_annule_perte" widget="monetary"/>
+                            </group>
+                            <group string="Achats — Ce qui a été soldé">
+                                <field name="depenses_totales" widget="monetary"/>
+                                <field name="depenses_cash" widget="monetary"/>
+                                <field name="depenses_compense_avoir" widget="monetary"/>
+                                <field name="depenses_annulees" widget="monetary"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group string="Résultat">
+                                <field name="marge_nette" widget="monetary"/>
+                                <field name="marge_taux"/>
+                                <field name="marge_cash" widget="monetary"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group string="Encours Clients (à ce jour)">
+                                <field name="creances_brutes" widget="monetary"/>
+                                <field name="avoirs_clients_a_imputer" widget="monetary"/>
+                                <field name="creances_en_cours" widget="monetary"/>
+                            </group>
+                            <group string="Encours Fournisseurs (à ce jour)">
+                                <field name="dettes_brutes" widget="monetary"/>
+                                <field name="avoirs_fournisseurs_a_imputer" widget="monetary"/>
+                                <field name="dettes_en_cours" widget="monetary"/>
+                            </group>
+                        </group>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
