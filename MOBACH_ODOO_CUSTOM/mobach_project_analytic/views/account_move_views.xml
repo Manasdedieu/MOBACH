@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ================================================================
+         FACTURES ET ÉCRITURES : projet en en-tête et sur chaque ligne
+    ================================================================ -->
+    <record id="view_move_form_mobach_project" model="ir.ui.view">
+        <field name="name">account.move.form.mobach.project</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+
+            <!-- En-tête de la pièce -->
+            <field name="invoice_payment_term_id" position="after">
+                <field name="analytic_project_id"
+                       groups="analytic.group_analytic_accounting"
+                       options="{'no_create_edit': True}"/>
+            </field>
+
+            <!-- Lignes de facture : onglet « Lignes de facture » -->
+            <xpath expr="//field[@name='invoice_line_ids']//list//field[@name='analytic_distribution']" position="before">
+                <field name="analytic_project_id"
+                       optional="show"
+                       groups="analytic.group_analytic_accounting"
+                       options="{'no_create_edit': True}"
+                       column_invisible="parent.move_type == 'entry'"/>
+            </xpath>
+
+            <!-- Lignes d'écriture : onglet « Écritures comptables » -->
+            <xpath expr="//field[@name='line_ids']//list//field[@name='analytic_distribution']" position="before">
+                <field name="analytic_project_id"
+                       optional="show"
+                       groups="analytic.group_analytic_accounting"
+                       options="{'no_create_edit': True}"/>
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- ================================================================
+         ÉCRITURES COMPTABLES (vue liste autonome)
+    ================================================================ -->
+    <record id="view_move_line_tree_mobach_project" model="ir.ui.view">
+        <field name="name">account.move.line.list.mobach.project</field>
+        <field name="model">account.move.line</field>
+        <field name="inherit_id" ref="account.view_move_line_tree"/>
+        <field name="arch" type="xml">
+            <field name="analytic_distribution" position="before">
+                <field name="analytic_project_id"
+                       optional="show"
+                       groups="analytic.group_analytic_accounting"/>
+            </field>
+        </field>
+    </record>
+
+</odoo>

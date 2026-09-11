@@ -1,0 +1,43 @@
+// ==============================================================================
+// MOBACH - Styles dédiés à la vue Kanban des Projets Analytiques
+// Dimensions équilibrées des cartes pour une consultation claire et harmonieuse
+// ==============================================================================
+
+.o_mobach_project_kanban {
+    --KanbanRecord-width: 360px;
+    --KanbanGroup-width: 380px;
+
+    .o_kanban_renderer {
+        --KanbanRecord-width: 360px;
+        --KanbanGroup-width: 380px;
+    }
+
+    &.o_kanban_ungrouped {
+        .o_kanban_record {
+            width: var(--KanbanRecord-width);
+            min-width: 330px;
+            max-width: 420px;
+            flex-grow: 1;
+
+            @include media-breakpoint-down(md) {
+                min-width: 100%;
+                width: 100%;
+                max-width: 100%;
+            }
+        }
+    }
+
+    .o_kanban_group {
+        width: var(--KanbanGroup-width);
+        min-width: var(--KanbanGroup-width);
+
+        .o_kanban_record {
+            width: 100%;
+            min-width: 320px;
+
+            @include media-breakpoint-down(md) {
+                min-width: 100%;
+            }
+        }
+    }
+}

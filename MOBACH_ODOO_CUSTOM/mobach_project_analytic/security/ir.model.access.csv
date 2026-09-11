@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_mobach_project_margin_report_analytic,mobach.project.margin.report analytic,model_mobach_project_margin_report,analytic.group_analytic_accounting,1,0,0,0
+access_mobach_project_margin_report_project_manager,mobach.project.margin.report project manager,model_mobach_project_margin_report,project.group_project_manager,1,0,0,0

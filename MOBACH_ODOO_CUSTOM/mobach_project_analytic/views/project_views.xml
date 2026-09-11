@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ================================================================
+         FICHE PROJET : suivi analytique et onglet Performance Financière
+    ================================================================ -->
+    <record id="edit_project_mobach_analytic" model="ir.ui.view">
+        <field name="name">project.project.form.mobach.analytic</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.edit_project"/>
+        <field name="arch" type="xml">
+
+            <!-- Boutons d'accès dans le button box -->
+            <div name="button_box" position="inside">
+                <button class="oe_stat_button"
+                        type="object"
+                        name="action_mobach_view_customer_invoices"
+                        icon="fa-pencil-square-o"
+                        groups="account.group_account_invoice">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_value">
+                            <field name="mobach_customer_invoice_count"/>
+                        </span>
+                        <span class="o_stat_text">Factures Clients</span>
+                    </div>
+                </button>
+                <button class="oe_stat_button"
+                        type="object"
+                        name="action_mobach_view_vendor_bills"
+                        icon="fa-book"
+                        groups="account.group_account_invoice">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_value">
+                            <field name="mobach_vendor_bill_count"/>
+                        </span>
+                        <span class="o_stat_text">Factures Fournisseurs</span>
+                    </div>
+                </button>
+                <button class="oe_stat_button"
+                        type="object"
+                        name="action_mobach_view_analytic_lines"
+                        icon="fa-pie-chart"
+                        groups="analytic.group_analytic_accounting"
+                        invisible="not account_id or is_template">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_value">
+                            <field name="mobach_analytic_line_count"/>
+                        </span>
+                        <span class="o_stat_text">Écritures analytiques</span>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Onglet dédié Performance Financière -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Performance Financière" name="mobach_financial_tracking" groups="analytic.group_analytic_accounting">
+                    <group>
+                        <group string="Recettes Clients (TTC)">
+                            <field name="mobach_currency_id" invisible="1"/>
+                            <field name="mobach_invoiced_revenue" widget="monetary"
+                                   options="{'currency_field': 'mobach_currency_id'}"/>
+                            <field name="mobach_revenue" widget="monetary"
+                                   options="{'currency_field': 'mobach_currency_id'}"/>
+                            <field name="mobach_customer_encours" widget="monetary"
+                                   options="{'currency_field': 'mobach_currency_id'}"
+                                   decoration-warning="mobach_customer_encours &gt; 0"/>
+                            <field name="mobach_collection_rate" widget="percentage"
+                                   decoration-success="mobach_collection_rate == 1.0"
+                                   decoration-info="mobach_collection_rate &gt; 0 and mobach_collection_rate &lt; 1.0"/>
+                        </group>
+                        <group string="Dépenses Fournisseurs (TTC)">
+                            <field name="mobach_invoiced_expense" widget="monetary"
+                                   options="{'currency_field': 'mobach_currency_id'}"/>
+                            <field name="mobach_expense" widget="monetary"
+                                   options="{'currency_field': 'mobach_currency_id'}"/>
+                            <field name="mobach_vendor_encours" widget="monetary"
+                                   options="{'currency_field': 'mobach_currency_id'}"
+                                   decoration-warning="mobach_vendor_encours &gt; 0"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Marge &amp; Rentabilité Réalisée">
+                            <field name="mobach_margin" widget="monetary"
+                                   options="{'currency_field': 'mobach_currency_id'}"
+                                   decoration-success="mobach_margin &gt; 0"
+                                   decoration-danger="mobach_margin &lt; 0"/>
+                            <field name="mobach_margin_rate" widget="percentage"
+                                   decoration-success="mobach_margin_rate &gt; 0"
+                                   decoration-danger="mobach_margin_rate &lt; 0"/>
+                            <field name="mobach_profitability_status" widget="badge"
+                                   decoration-success="mobach_profitability_status == 'profitable'"
+                                   decoration-danger="mobach_profitability_status == 'loss'"
+                                   decoration-muted="mobach_profitability_status == 'neutral'"/>
+                        </group>
+                        <group string="Pilotage Analytique">
+                            <field name="account_id" string="Compte analytique lié" readonly="1"/>
+                            <button name="action_mobach_view_margin_report"
+                                    type="object"
+                                    string="Tableau croisé de rentabilité"
+                                    class="btn-primary"
+                                    icon="fa-table"
+                                    invisible="not account_id or is_template"/>
+                            <button name="action_mobach_view_analytic_lines"
+                                    type="object"
+                                    string="Consulter les écritures analytiques"
+                                    class="btn-secondary"
+                                    icon="fa-list"
+                                    invisible="not account_id or is_template"/>
+                            <button name="action_mobach_create_analytic_account"
+                                    type="object"
+                                    string="Créer le compte analytique"
+                                    class="btn-link"
+                                    icon="fa-plus"
+                                    invisible="account_id or is_template"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+
+            <!-- Totaux dans le groupe analytique de l'onglet Configuration -->
+            <xpath expr="//group[@name='analytic']/field[@name='account_id']" position="after">
+                <field name="mobach_currency_id" invisible="1"/>
+                <field name="mobach_revenue" widget="monetary"
+                       options="{'currency_field': 'mobach_currency_id'}"/>
+                <field name="mobach_customer_encours" widget="monetary"
+                       options="{'currency_field': 'mobach_currency_id'}"/>
+                <field name="mobach_expense" widget="monetary"
+                       options="{'currency_field': 'mobach_currency_id'}"/>
+                <field name="mobach_vendor_encours" widget="monetary"
+                       options="{'currency_field': 'mobach_currency_id'}"/>
+                <field name="mobach_margin" widget="monetary"
+                       options="{'currency_field': 'mobach_currency_id'}"
+                       decoration-success="mobach_margin &gt; 0"
+                       decoration-danger="mobach_margin &lt; 0"/>
+                <button name="action_mobach_view_margin_report"
+                        type="object"
+                        string="Tableau croisé de rentabilité"
+                        class="btn-link"
+                        icon="fa-table"
+                        colspan="2"
+                        groups="analytic.group_analytic_accounting"
+                        invisible="not account_id or is_template"/>
+                <button name="action_mobach_create_analytic_account"
+                        type="object"
+                        string="Créer le compte analytique"
+                        class="btn-link"
+                        icon="fa-plus"
+                        colspan="2"
+                        invisible="account_id or is_template"/>
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- ================================================================
+         LISTE DES PROJETS : colonnes de suivi
+    ================================================================ -->
+    <record id="view_project_mobach_analytic" model="ir.ui.view">
+        <field name="name">project.project.list.mobach.analytic</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project"/>
+        <field name="arch" type="xml">
+            <field name="partner_id" position="after">
+                <field name="mobach_currency_id" column_invisible="1"/>
+                <field name="mobach_invoiced_revenue" optional="hide" widget="monetary"
+                       options="{'currency_field': 'mobach_currency_id'}"
+                       groups="analytic.group_analytic_accounting"/>
+                <field name="mobach_revenue" optional="show" widget="monetary"
+                       options="{'currency_field': 'mobach_currency_id'}"
+                       groups="analytic.group_analytic_accounting"/>
+                <field name="mobach_customer_encours" optional="show" widget="monetary"
+                       options="{'currency_field': 'mobach_currency_id'}"
+                       groups="analytic.group_analytic_accounting"
+                       decoration-warning="mobach_customer_encours &gt; 0"/>
+                <field name="mobach_collection_rate" optional="show" widget="percentage"
+                       groups="analytic.group_analytic_accounting"
+                       decoration-success="mobach_collection_rate == 1.0"/>
+                <field name="mobach_invoiced_expense" optional="hide" widget="monetary"
+                       options="{'currency_field': 'mobach_currency_id'}"
+                       groups="analytic.group_analytic_accounting"/>
+                <field name="mobach_expense" optional="show" widget="monetary"
+                       options="{'currency_field': 'mobach_currency_id'}"
+                       groups="analytic.group_analytic_accounting"/>
+                <field name="mobach_vendor_encours" optional="show" widget="monetary"
+                       options="{'currency_field': 'mobach_currency_id'}"
+                       groups="analytic.group_analytic_accounting"
+                       decoration-warning="mobach_vendor_encours &gt; 0"/>
+                <field name="mobach_margin" optional="show" widget="monetary"
+                       options="{'currency_field': 'mobach_currency_id'}"
+                       groups="analytic.group_analytic_accounting"
+                       decoration-success="mobach_margin &gt; 0"
+                       decoration-danger="mobach_margin &lt; 0"/>
+                <field name="mobach_margin_rate" optional="show" widget="percentage"
+                       groups="analytic.group_analytic_accounting"
+                       decoration-success="mobach_margin_rate &gt; 0"
+                       decoration-danger="mobach_margin_rate &lt; 0"/>
+                <field name="mobach_profitability_status" optional="show" widget="badge"
+                       groups="analytic.group_analytic_accounting"
+                       decoration-success="mobach_profitability_status == 'profitable'"
+                       decoration-danger="mobach_profitability_status == 'loss'"
+                       decoration-muted="mobach_profitability_status == 'neutral'"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         VUE KANBAN CHANTIERS : suivi financier visuel
+    ================================================================ -->
+    <record id="view_project_kanban_mobach_analytic" model="ir.ui.view">
+        <field name="name">project.project.kanban.mobach.analytic</field>
+        <field name="model">project.project</field>
+        <field name="priority">25</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_dashboard o_mobach_project_kanban" sample="1">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="user_id"/>
+                <field name="account_id"/>
+                <field name="is_template"/>
+                <field name="mobach_currency_id"/>
+                <field name="mobach_invoiced_revenue"/>
+                <field name="mobach_revenue"/>
+                <field name="mobach_customer_encours"/>
+                <field name="mobach_collection_rate"/>
+                <field name="mobach_invoiced_expense"/>
+                <field name="mobach_expense"/>
+                <field name="mobach_vendor_encours"/>
+                <field name="mobach_margin"/>
+                <field name="mobach_margin_rate"/>
+                <field name="mobach_profitability_status"/>
+                <field name="mobach_analytic_line_count"/>
+                <field name="mobach_customer_invoice_count"/>
+                <field name="mobach_vendor_bill_count"/>
+                <templates>
+                    <t t-name="card">
+                        <main t-attf-class="d-flex flex-column h-100 border-start border-4 {{ record.mobach_profitability_status.raw_value == 'profitable' ? 'border-success' : (record.mobach_profitability_status.raw_value == 'loss' ? 'border-danger' : 'border-secondary') }} p-2 ps-3">
+                            <!-- En-tête : Nom du Projet & Statut de Rentabilité -->
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div class="min-w-0 pe-2">
+                                    <strong class="o_kanban_record_title fs-6 d-block fw-bold text-dark text-truncate" t-att-title="record.name.value">
+                                        <field name="name"/>
+                                    </strong>
+                                    <div class="text-muted small mt-1 d-flex flex-wrap gap-1 align-items-center">
+                                        <span t-if="record.partner_id.value" class="text-truncate" style="max-width: 150px;">
+                                            <i class="fa fa-building-o me-1 text-primary" title="Client" aria-label="Client"/>
+                                            <field name="partner_id"/>
+                                        </span>
+                                        <span t-if="record.user_id.value" class="text-truncate ms-1" style="max-width: 130px;">
+                                            <i class="fa fa-user-circle me-1 text-muted" title="Chef de projet" aria-label="Chef de projet"/>
+                                            <field name="user_id"/>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="text-end flex-shrink-0">
+                                    <field name="mobach_profitability_status" widget="badge"
+                                           decoration-success="mobach_profitability_status == 'profitable'"
+                                           decoration-danger="mobach_profitability_status == 'loss'"
+                                           decoration-muted="mobach_profitability_status == 'neutral'"/>
+                                </div>
+                            </div>
+
+                            <!-- Bloc 1 : RECETTES CLIENTS & RECOUVREMENT -->
+                            <div class="border rounded-2 p-2 mb-2 bg-light-subtle shadow-sm">
+                                <div class="d-flex justify-content-between align-items-center mb-1 pb-1 border-bottom">
+                                    <span class="text-uppercase fw-bold text-primary" style="font-size: 0.70rem; letter-spacing: 0.5px;">
+                                        <i class="fa fa-arrow-circle-down me-1"/>Recettes Clients (TTC)
+                                    </span>
+                                    <span class="badge rounded-pill bg-white text-secondary border px-2 py-0" style="font-size: 0.68rem;" title="Taux d'encaissement">
+                                        <i class="fa fa-pie-chart me-1 text-primary"/>
+                                        <field name="mobach_collection_rate" widget="percentage"/>
+                                    </span>
+                                </div>
+                                <div class="row text-center g-1">
+                                    <div class="col-4 border-end">
+                                        <div class="text-muted text-uppercase mb-1" style="font-size: 0.65rem; font-weight: 600;">CA Facturé</div>
+                                        <div class="fw-bold text-dark small" style="white-space: nowrap;">
+                                            <field name="mobach_invoiced_revenue" widget="monetary" options="{'currency_field': 'mobach_currency_id'}"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-4 border-end">
+                                        <div class="text-muted text-uppercase mb-1" style="font-size: 0.65rem; font-weight: 600;">CA Encaissé</div>
+                                        <div class="fw-bold text-primary small" style="white-space: nowrap;">
+                                            <field name="mobach_revenue" widget="monetary" options="{'currency_field': 'mobach_currency_id'}"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="text-muted text-uppercase mb-1" style="font-size: 0.65rem; font-weight: 600;">Encours Client</div>
+                                        <div t-attf-class="fw-bold small {{ record.mobach_customer_encours.raw_value &gt; 0 ? 'text-warning' : 'text-muted' }}" style="white-space: nowrap;">
+                                            <t t-if="record.mobach_customer_encours.raw_value &gt; 0">
+                                                <i class="fa fa-hourglass-half me-1" style="font-size: 0.65rem;" title="En attente d'encaissement"/>
+                                            </t>
+                                            <field name="mobach_customer_encours" widget="monetary" options="{'currency_field': 'mobach_currency_id'}"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Jauge de progression du recouvrement -->
+                                <div class="progress mt-1" style="height: 4px; border-radius: 2px;" t-att-title="'Recouvrement : ' + (record.mobach_collection_rate.value || '0%')">
+                                    <div t-attf-class="progress-bar {{ record.mobach_collection_rate.raw_value &gt;= 1.0 ? 'bg-success' : (record.mobach_collection_rate.raw_value &gt; 0 ? 'bg-primary' : 'bg-secondary') }}"
+                                         role="progressbar"
+                                         t-att-style="'width: ' + Math.min(100, Math.max(0, Math.round((record.mobach_collection_rate.raw_value || 0) * 100))) + '%;'"/>
+                                </div>
+                            </div>
+
+                            <!-- Bloc 2 : DÉPENSES & ENCOURS FOURNISSEURS -->
+                            <div class="border rounded-2 p-2 mb-2 bg-light-subtle shadow-sm">
+                                <div class="d-flex justify-content-between align-items-center mb-1 pb-1 border-bottom">
+                                    <span class="text-uppercase fw-bold text-danger" style="font-size: 0.70rem; letter-spacing: 0.5px;">
+                                        <i class="fa fa-shopping-cart me-1"/>Dépenses Fournisseurs (TTC)
+                                    </span>
+                                </div>
+                                <div class="row text-center g-1">
+                                    <div class="col-4 border-end">
+                                        <div class="text-muted text-uppercase mb-1" style="font-size: 0.65rem; font-weight: 600;">Facturé</div>
+                                        <div class="fw-bold text-dark small" style="white-space: nowrap;">
+                                            <field name="mobach_invoiced_expense" widget="monetary" options="{'currency_field': 'mobach_currency_id'}"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-4 border-end">
+                                        <div class="text-muted text-uppercase mb-1" style="font-size: 0.65rem; font-weight: 600;">Décaissé</div>
+                                        <div class="fw-bold text-danger small" style="white-space: nowrap;">
+                                            <field name="mobach_expense" widget="monetary" options="{'currency_field': 'mobach_currency_id'}"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="text-muted text-uppercase mb-1" style="font-size: 0.65rem; font-weight: 600;">Encours Fourn.</div>
+                                        <div t-attf-class="fw-bold small {{ record.mobach_vendor_encours.raw_value &gt; 0 ? 'text-danger' : 'text-muted' }}" style="white-space: nowrap;">
+                                            <t t-if="record.mobach_vendor_encours.raw_value &gt; 0">
+                                                <i class="fa fa-exclamation-circle me-1" style="font-size: 0.65rem;" title="Reste à payer aux fournisseurs"/>
+                                            </t>
+                                            <field name="mobach_vendor_encours" widget="monetary" options="{'currency_field': 'mobach_currency_id'}"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Bloc 3 : SYNTHÈSE RENTABILITÉ RÉALISÉE (Bannière Marge) -->
+                            <div t-attf-class="p-2 px-2 rounded-2 border d-flex justify-content-between align-items-center mb-1 {{ record.mobach_margin.raw_value &gt; 0 ? 'bg-success-subtle border-success-subtle' : (record.mobach_margin.raw_value &lt; 0 ? 'bg-danger-subtle border-danger-subtle' : 'bg-light border-secondary-subtle') }}">
+                                <div>
+                                    <div class="text-uppercase fw-bold text-muted" style="font-size: 0.68rem; letter-spacing: 0.5px;">
+                                        Marge Nette (Encaissé - Décaissé)
+                                    </div>
+                                    <div t-attf-class="fs-6 fw-bolder {{ record.mobach_margin.raw_value &gt; 0 ? 'text-success' : (record.mobach_margin.raw_value &lt; 0 ? 'text-danger' : 'text-muted') }}" style="white-space: nowrap;">
+                                        <field name="mobach_margin" widget="monetary" options="{'currency_field': 'mobach_currency_id'}"/>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <div class="text-muted small text-uppercase" style="font-size: 0.65rem;">Taux de marge</div>
+                                    <span t-attf-class="badge {{ record.mobach_margin_rate.raw_value &gt; 0 ? 'bg-success text-white' : (record.mobach_margin_rate.raw_value &lt; 0 ? 'bg-danger text-white' : 'bg-secondary text-white') }} fw-bold px-2 py-1">
+                                        <field name="mobach_margin_rate" widget="percentage"/>
+                                    </span>
+                                </div>
+                            </div>
+                        </main>
+
+                        <footer class="pt-2 d-flex justify-content-between align-items-center border-top">
+                            <!-- Compte analytique lié -->
+                            <div class="small text-truncate me-2" style="max-width: 130px;">
+                                <span t-if="record.account_id.value" class="badge bg-light text-dark border px-2 py-1 text-truncate" t-att-title="'Compte analytique: ' + record.account_id.value">
+                                    <i class="fa fa-tag me-1 text-primary"/> <field name="account_id"/>
+                                </span>
+                            </div>
+                            <!-- Boutons de drill-down -->
+                            <div class="d-flex gap-1 flex-shrink-0">
+                                <a type="object" name="action_mobach_view_customer_invoices" class="btn btn-sm btn-outline-primary py-0 px-2 rounded-pill" role="button" title="Factures Clients">
+                                    <i class="fa fa-file-text-o me-1" aria-label="Factures Clients"/>
+                                    <field name="mobach_customer_invoice_count"/>
+                                </a>
+                                <a type="object" name="action_mobach_view_vendor_bills" class="btn btn-sm btn-outline-secondary py-0 px-2 rounded-pill" role="button" title="Factures Fournisseurs">
+                                    <i class="fa fa-truck me-1" aria-label="Factures Fournisseurs"/>
+                                    <field name="mobach_vendor_bill_count"/>
+                                </a>
+                                <a type="object" name="action_mobach_view_analytic_lines" class="btn btn-sm btn-outline-secondary py-0 px-2 rounded-pill" role="button" title="Écritures analytiques">
+                                    <i class="fa fa-list me-1" aria-label="Écritures analytiques"/>
+                                    <field name="mobach_analytic_line_count"/>
+                                </a>
+                                <a type="object" name="action_mobach_view_margin_report" class="btn btn-sm btn-outline-success py-0 px-2 rounded-pill" role="button" title="Tableau de rentabilité">
+                                    <i class="fa fa-table" aria-label="Rentabilité"/>
+                                </a>
+                            </div>
+                        </footer>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+</odoo>
