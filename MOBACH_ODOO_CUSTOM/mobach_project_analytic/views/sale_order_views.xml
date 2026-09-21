@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ================================================================
+         COMMANDE CLIENT : projet en en-tête et sur chaque ligne
+    ================================================================ -->
+    <record id="view_order_form_mobach_project" model="ir.ui.view">
+        <field name="name">sale.order.form.mobach.project</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Masquer l'ancien project_id (avant journal_id) posé par sale_project -->
+            <xpath expr="//field[@name='journal_id']/preceding-sibling::field[@name='project_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <!-- En-tête : à côté des conditions de règlement -->
+            <field name="payment_term_id" position="after">
+                <field name="project_id"
+                       groups="analytic.group_analytic_accounting"
+                       options="{'no_create_edit': True}"/>
+            </field>
+
+            <!-- Ligne, vue liste -->
+            <xpath expr="//field[@name='order_line']//list//field[@name='analytic_distribution']" position="before">
+                <field name="project_id"
+                       optional="show"
+                       groups="analytic.group_analytic_accounting"
+                       options="{'no_create_edit': True}"/>
+            </xpath>
+
+            <!-- Ligne, vue formulaire (écran étroit) -->
+            <xpath expr="//field[@name='order_line']//form//field[@name='analytic_distribution']" position="before">
+                <field name="project_id"
+                       groups="analytic.group_analytic_accounting"
+                       options="{'no_create_edit': True}"/>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

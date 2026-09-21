@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Le rapport est une vue SQL : aucune règle multi-société n'est héritée
+         des modèles sous-jacents, il faut donc la poser ici. Sans elle, une
+         société verrait la marge des chantiers des autres. -->
+    <record id="mobach_project_margin_report_company_rule" model="ir.rule">
+        <field name="name">Rentabilité des projets : multi-sociétés</field>
+        <field name="model_id" ref="model_mobach_project_margin_report"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+
+</odoo>

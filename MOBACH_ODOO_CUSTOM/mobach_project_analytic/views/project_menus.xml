@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ================================================================
+         APPLICATION PROJET RÉDUITE À DEUX ENTRÉES
+
+         Le groupe MOBACH n'utilise pas Odoo pour piloter des tâches : les
+         projets ne servent ici que de centres de coût, alimentés par les
+         factures et les commandes. Les menus natifs (Tâches, Analyse des
+         tâches, Évaluations, toute la Configuration) n'ont donc pas d'emploi.
+
+         Il reste :
+           1. « Projet »      — la liste des projets, pour les créer et les tenir
+           2. « Rentabilité »  — le tableau croisé CA / Dépenses / Marge, défini
+                                 avec son action dans report/
+    ================================================================ -->
+
+    <!-- ================================================================
+         MENU « PROJET » : la liste, pas le kanban
+
+         Une action propre plutôt qu'une surcharge de
+         `project.open_view_project_all` : celle d'Odoo impose son kanban par
+         `view_id`, et la détourner priverait de leur vue d'origine les autres
+         chemins qui l'ouvrent (raccourcis, liens `/odoo/project`).
+
+         La liste est le bon écran ici : elle porte déjà les colonnes de suivi
+         posées par ce module — chiffre d'affaires, dépenses, marge — et permet
+         de comparer les chantiers d'un coup d'œil. Le bouton « Nouveau » y crée
+         un projet comme ailleurs, avec son compte analytique dans la foulée.
+    ================================================================ -->
+    <record id="action_mobach_project_all" model="ir.actions.act_window">
+        <field name="name">Projets</field>
+        <field name="res_model">project.project</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('is_template', '=', False)]</field>
+        <field name="context">{'display_milestone_deadline': True}</field>
+        <field name="search_view_id" ref="project.view_project_project_filter"/>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'kanban', 'view_id': ref('view_project_kanban_mobach_analytic')}),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_project_mobach_analytic')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('project.edit_project')}),
+        ]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Aucun projet — créez le premier
+            </p>
+            <p>
+                Un projet est le centre de coût d'un chantier : les lignes de
+                commande, de facture et d'écriture qui lui sont affectées
+                alimentent son chiffre d'affaires et ses dépenses.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_mobach_project_all"
+              name="Projet"
+              parent="project.menu_main_pm"
+              action="action_mobach_project_all"
+              sequence="1"/>
+
+    <!-- ================================================================
+         MENUS NATIFS MASQUÉS
+
+         Désactiver un menu parent masque ses enfants : les cinq menus de
+         premier niveau suffisent.
+
+         RÉVERSIBLE : ces enregistrements ne font qu'écrire `active = False`.
+         Pour rendre l'application complète, mettre les champs à True ci-dessous
+         puis `-u mobach_project_analytic`, ou réactiver les menus depuis
+         Paramètres > Technique > Interface > Menus.
+
+         Un `-u project` ne les réveillera pas : la balise `<menuitem>` d'Odoo
+         n'écrit jamais le champ `active`, elle ne peut donc pas l'écraser.
+    ================================================================ -->
+
+    <!-- Projets (liste simple et liste groupée par étape) -->
+    <record id="project.menu_projects" model="ir.ui.menu">
+        <field name="active" eval="False"/>
+    </record>
+    <record id="project.menu_projects_group_stage" model="ir.ui.menu">
+        <field name="active" eval="False"/>
+    </record>
+
+    <!-- Tâches : Mes tâches, Toutes les tâches -->
+    <record id="project.menu_project_management" model="ir.ui.menu">
+        <field name="active" eval="False"/>
+    </record>
+
+    <!-- Analyse native : Analyse des tâches, Évaluations clients -->
+    <record id="project.menu_project_report" model="ir.ui.menu">
+        <field name="active" eval="False"/>
+    </record>
+
+    <!-- Configuration : Paramètres, Étapes, Étiquettes, Rôles, Activités -->
+    <record id="project.menu_project_config" model="ir.ui.menu">
+        <field name="active" eval="False"/>
+    </record>
+
+</odoo>
