@@ -1,0 +1,377 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- ================================================================
+             VUE KANBAN — TABLEAU DE BORD PERFORMANCES FINANCIÈRES PAR SOCIÉTÉ
+        ================================================================ -->
+        <record id="view_mobach_financial_performance_kanban" model="ir.ui.view">
+            <field name="name">mobach.financial.performance.kanban</field>
+            <field name="model">mobach.financial.performance</field>
+            <field name="arch" type="xml">
+                <kanban class="mobach_financial_dashboard_kanban o_kanban_dashboard o_account_kanban" create="true" sample="1">
+                    <field name="name"/>
+                    <field name="company_id"/>
+                    <field name="portal_description"/>
+                    <field name="currency_id"/>
+                    <field name="period"/>
+                    <field name="ca_realise"/>
+                    <field name="ca_encaisse_cash"/>
+                    <field name="ca_compense_avoir"/>
+                    <field name="ca_annule_perte"/>
+                    <field name="depenses_totales"/>
+                    <field name="depenses_cash"/>
+                    <field name="depenses_compense_avoir"/>
+                    <field name="depenses_annulees"/>
+                    <field name="marge_nette"/>
+                    <field name="marge_cash"/>
+                    <field name="marge_taux"/>
+                    <field name="marge_status"/>
+                    <field name="creances_brutes"/>
+                    <field name="avoirs_clients_a_imputer"/>
+                    <field name="creances_en_cours"/>
+                    <field name="dettes_brutes"/>
+                    <field name="avoirs_fournisseurs_a_imputer"/>
+                    <field name="dettes_en_cours"/>
+                    <field name="last_update"/>
+
+                    <templates>
+                        <t t-name="card">
+                            <div class="oe_kanban_global_click mobach-kanban-card">
+                                <!-- 1. En-tête : Logo Société, Nom & Secteur d'Activité, Statut -->
+                                <div class="mobach-card-header">
+                                    <div class="mobach-company-info">
+                                        <!-- Logo de la Société -->
+                                        <div class="mobach-logo-wrapper">
+                                            <img t-attf-src="/company_portal/logo/{{ record.company_id.raw_value }}"
+                                                 t-att-alt="record.company_id.value"
+                                                 onerror="this.src='/web/binary/company_logo'"/>
+                                        </div>
+                                        <div style="min-width: 0;">
+                                            <h4 class="mobach-company-name">
+                                                <field name="company_id"/>
+                                            </h4>
+                                            <t t-if="record.portal_description.raw_value">
+                                                <p class="mobach-company-subtitle">
+                                                    <field name="portal_description"/>
+                                                </p>
+                                            </t>
+                                            <t t-else="">
+                                                <p class="mobach-company-subtitle">
+                                                    Groupe MOBACH
+                                                </p>
+                                            </t>
+                                            <span class="mobach-period-pill">
+                                                <i class="fa fa-calendar-o text-primary"/>
+                                                <field name="period"/>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <t t-if="record.marge_status.raw_value == 'positive'">
+                                            <span class="mobach-status-badge positive">
+                                                <i class="fa fa-arrow-up"/> Bénéficiaire
+                                            </span>
+                                        </t>
+                                        <t t-elif="record.marge_status.raw_value == 'negative'">
+                                            <span class="mobach-status-badge negative">
+                                                <i class="fa fa-arrow-down"/> Déficitaire
+                                            </span>
+                                        </t>
+                                        <t t-else="">
+                                            <span class="mobach-status-badge neutral">
+                                                <i class="fa fa-minus"/> Neutre
+                                            </span>
+                                        </t>
+                                    </div>
+                                </div>
+
+                                <!-- 2. Grille Principale des 3 KPIs Majeurs (Entrées / Sorties / Marge Nette) -->
+                                <div class="mobach-kpis-grid">
+                                    <!-- Chiffre d'Affaires Encaissé (Entrées) -->
+                                    <div class="mobach-kpi-card kpi-ca">
+                                        <div class="mobach-kpi-icon-title">
+                                            <i class="fa fa-arrow-circle-down"/> Entrées (CA)
+                                        </div>
+                                        <div class="mobach-kpi-value">
+                                            <field name="ca_realise" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                        </div>
+                                        <div class="mobach-kpi-subtext">
+                                            dont cash :
+                                            <field name="ca_encaisse_cash" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                        </div>
+                                        <div class="mobach-kpi-subtext">
+                                            dont avoirs :
+                                            <field name="ca_compense_avoir" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                        </div>
+                                    </div>
+
+                                    <!-- Dépenses Réglées (Sorties) -->
+                                    <div class="mobach-kpi-card kpi-depenses">
+                                        <div class="mobach-kpi-icon-title">
+                                            <i class="fa fa-arrow-circle-up"/> Sorties (Charges)
+                                        </div>
+                                        <div class="mobach-kpi-value">
+                                            <field name="depenses_totales" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                        </div>
+                                        <div class="mobach-kpi-subtext">
+                                            dont cash :
+                                            <field name="depenses_cash" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                        </div>
+                                        <div class="mobach-kpi-subtext">
+                                            dont avoirs :
+                                            <field name="depenses_compense_avoir" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                        </div>
+                                    </div>
+
+                                    <!-- Marge Nette Réalisée -->
+                                    <div t-attf-class="mobach-kpi-card #{record.marge_nette.raw_value >= 0 ? 'kpi-marge-pos' : 'kpi-marge-neg'}">
+                                        <div class="mobach-kpi-icon-title">
+                                            <i class="fa fa-balance-scale"/> Marge Nette
+                                        </div>
+                                        <div class="mobach-kpi-value">
+                                            <field name="marge_nette" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                        </div>
+                                        <div class="mobach-kpi-subtext fw-bold">
+                                            Taux : <field name="marge_taux"/>%
+                                        </div>
+                                        <div class="mobach-kpi-subtext">
+                                            Cash net :
+                                            <field name="marge_cash" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 3. Barre Secondaire : Créances et Dettes nettes -->
+                                <div class="mobach-secondary-bar">
+                                    <div class="mobach-metric-item">
+                                        <span class="metric-label">
+                                            <i class="fa fa-clock-o text-warning"/> Créances nettes
+                                        </span>
+                                        <span class="metric-val text-warning-emphasis">
+                                            <field name="creances_en_cours" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                        </span>
+                                    </div>
+                                    <div class="mobach-metric-item">
+                                        <span class="metric-label">
+                                            <i class="fa fa-exclamation-triangle text-danger"/> Dettes nettes
+                                        </span>
+                                        <span class="metric-val text-danger">
+                                            <field name="dettes_en_cours" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- 3 bis. Alertes : montants encore en circulation -->
+                                <div class="mobach-secondary-bar">
+                                    <div class="mobach-metric-item">
+                                        <span class="metric-label">
+                                            <i class="fa fa-undo text-warning"/> Avoirs clients à imputer
+                                        </span>
+                                        <span class="metric-val text-warning-emphasis">
+                                            <field name="avoirs_clients_a_imputer" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                        </span>
+                                    </div>
+                                    <div class="mobach-metric-item">
+                                        <span class="metric-label">
+                                            <i class="fa fa-undo text-success"/> Avoirs fournisseurs à imputer
+                                        </span>
+                                        <span class="metric-val text-success">
+                                            <field name="avoirs_fournisseurs_a_imputer" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- 4. Pied de Carte : Boutons d'Action & Rafraîchissement -->
+                                <div class="mobach-card-footer">
+                                    <div class="btn-action-group">
+                                        <button type="object" name="action_view_invoices" class="btn btn-action btn-outline-primary shadow-none">
+                                            <i class="fa fa-file-text-o"/> Factures
+                                        </button>
+                                        <button type="object" name="action_view_payments" class="btn btn-action btn-outline-secondary shadow-none">
+                                            <i class="fa fa-money"/> Paiements
+                                        </button>
+                                        <a href="/financial_performance" target="_blank" class="btn btn-action btn-outline-info shadow-none">
+                                            <i class="fa fa-globe"/> Portail Web
+                                        </a>
+                                    </div>
+                                    <div>
+                                        <button type="object" name="action_refresh_kpis" class="btn btn-refresh" title="Recalculer les indicateurs en temps réel">
+                                            <i class="fa fa-refresh me-1"/> Actualiser
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <!-- ================================================================
+             VUE FORMULAIRE
+        ================================================================ -->
+        <record id="view_mobach_financial_performance_form" model="ir.ui.view">
+            <field name="name">mobach.financial.performance.form</field>
+            <field name="model">mobach.financial.performance</field>
+            <field name="arch" type="xml">
+                <form string="Performance Financière par Société">
+                    <header>
+                        <button name="action_refresh_kpis" type="object" string="Recalculer les KPIs" class="btn-primary" icon="fa-refresh"/>
+                        <button name="action_view_invoices" type="object" string="Voir les Factures" icon="fa-file-text-o"/>
+                        <button name="action_view_payments" type="object" string="Voir les Paiements" icon="fa-money"/>
+                    </header>
+                    <sheet>
+                        <field name="company_logo" widget="image" class="oe_avatar" options="{'preview_image': 'company_logo'}"/>
+                        <div class="oe_title">
+                            <label for="company_id" string="Société MOBACH"/>
+                            <h1><field name="company_id"/></h1>
+                            <h4 class="text-muted"><field name="portal_description" readonly="1"/></h4>
+                        </div>
+                        <group>
+                            <group string="Configuration &amp; Filtres">
+                                <field name="period"/>
+                                <field name="currency_id" invisible="1"/>
+                            </group>
+                            <group string="Statut &amp; Suivi">
+                                <field name="marge_status" widget="badge"/>
+                                <field name="last_update" readonly="1"/>
+                            </group>
+                        </group>
+
+                        <notebook>
+                            <page string="Flux de la Période" name="financial_metrics">
+                                <group>
+                                    <group string="Ventes — Ce qui a été soldé">
+                                        <field name="ca_realise" widget="monetary"/>
+                                        <field name="ca_encaisse_cash" widget="monetary"/>
+                                        <field name="ca_compense_avoir" widget="monetary"/>
+                                        <field name="ca_annule_perte" widget="monetary"/>
+                                    </group>
+                                    <group string="Achats — Ce qui a été soldé">
+                                        <field name="depenses_totales" widget="monetary"/>
+                                        <field name="depenses_cash" widget="monetary"/>
+                                        <field name="depenses_compense_avoir" widget="monetary"/>
+                                        <field name="depenses_annulees" widget="monetary"/>
+                                    </group>
+                                </group>
+                                <group>
+                                    <group string="Résultat de la Période">
+                                        <field name="marge_nette" widget="monetary"/>
+                                        <field name="marge_taux"/>
+                                        <field name="marge_cash" widget="monetary"/>
+                                    </group>
+                                </group>
+                                <div class="alert alert-info" role="alert">
+                                    <b>Lecture.</b> Le CA encaissé additionne les encaissements réels et les
+                                    montants soldés par lettrage avec un avoir client. La ligne
+                                    « dont Encaissements Réels » isole l'argent effectivement entré en
+                                    banque ou en caisse. Le « CA Annulé / Passé en Perte » regroupe les
+                                    factures soldées par écriture diverse (créance irrécouvrable,
+                                    escompte, écart de règlement) : il est exclu du CA encaissé.
+                                </div>
+                            </page>
+                            <page string="Encours (à ce jour)" name="financial_stocks">
+                                <group>
+                                    <group string="Clients">
+                                        <field name="creances_brutes" widget="monetary"/>
+                                        <field name="avoirs_clients_a_imputer" widget="monetary"/>
+                                        <field name="creances_en_cours" widget="monetary"/>
+                                    </group>
+                                    <group string="Fournisseurs">
+                                        <field name="dettes_brutes" widget="monetary"/>
+                                        <field name="avoirs_fournisseurs_a_imputer" widget="monetary"/>
+                                        <field name="dettes_en_cours" widget="monetary"/>
+                                    </group>
+                                </group>
+                                <div class="alert alert-secondary" role="alert">
+                                    Les encours sont des <b>stocks</b> : ils sont toujours donnés à la
+                                    date du jour et ne dépendent pas de la période d'analyse choisie
+                                    ci-dessus, qui ne concerne que les flux.
+                                </div>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- ================================================================
+             VUE RECHERCHE / FILTRES
+        ================================================================ -->
+        <record id="view_mobach_financial_performance_search" model="ir.ui.view">
+            <field name="name">mobach.financial.performance.search</field>
+            <field name="model">mobach.financial.performance</field>
+            <field name="arch" type="xml">
+                <search string="Recherche Performance Financière">
+                    <field name="name"/>
+                    <field name="company_id"/>
+                    <filter string="Mois en Cours" name="filter_month" domain="[('period', '=', 'month')]"/>
+                    <filter string="Trimestre en Cours" name="filter_quarter" domain="[('period', '=', 'quarter')]"/>
+                    <filter string="Année en Cours" name="filter_year" domain="[('period', '=', 'year')]"/>
+                    <separator/>
+                    <filter string="Historique Global" name="filter_all" domain="[('period', '=', 'all')]"/>
+                    <group name="groupby">
+                        <filter string="Société" name="group_by_company" context="{'group_by': 'company_id'}"/>
+                        <filter string="Période" name="group_by_period" context="{'group_by': 'period'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- ================================================================
+             ACTION ET MENU ODOO
+        ================================================================ -->
+        <record id="action_mobach_financial_performance" model="ir.actions.act_window">
+            <field name="name">Performance Financière par Société</field>
+            <field name="res_model">mobach.financial.performance</field>
+            <field name="view_mode">kanban,list,form</field>
+            <field name="search_view_id" ref="view_mobach_financial_performance_search"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Aucun tableau de bord de performance financière n'est configuré.
+                </p>
+                <p>
+                    Cliquez sur Créer pour ajouter la vue de performance financière d'une société MOBACH.
+                </p>
+            </field>
+        </record>
+
+        <!-- ================================================================
+             ACTION URL - PORTAIL WEB DE PERFORMANCE FINANCIÈRE
+        ================================================================ -->
+        <record id="action_mobach_financial_performance_portal" model="ir.actions.act_url">
+            <field name="name">Tableaux de Bord Performance Financière</field>
+            <field name="url">/financial_performance</field>
+            <field name="target">new</field>  <!-- Options: 'new' (nouvel onglet) | 'self' (même fenêtre) -->
+        </record>
+
+        <!-- ================================================================
+             HIÉRARCHIE DES MENUS - UN SEUL GROUPE POUR TOUS
+        ================================================================ -->
+
+        <!-- Menu Principal : Performance Financière -->
+        <menuitem id="menu_mobach_financial_performance_root"
+                  name="Performance Financière"
+                  parent="account.menu_finance_reports"
+                  groups="mobach_financial_portal.group_financial_portal_user"
+                  sequence="1"/>
+
+        <!-- Sous-menu 1 : Tableaux de bord (Portail Web) -->
+        <menuitem id="menu_mobach_financial_performance_portal"
+                  name="Tableaux de bord"
+                  parent="menu_mobach_financial_performance_root"
+                  action="action_mobach_financial_performance_portal"
+                  groups="mobach_financial_portal.group_financial_portal_user"
+                  sequence="10"/>
+
+        <!-- Sous-menu 2 : Configuration (Vue Kanban Backend) -->
+        <menuitem id="menu_mobach_financial_configuration"
+                  name="Configuration"
+                  parent="menu_mobach_financial_performance_root"
+                  action="action_mobach_financial_performance"
+                  groups="mobach_financial_portal.group_financial_portal_user"
+                  sequence="20"/>
+
+    </data>
+</odoo>

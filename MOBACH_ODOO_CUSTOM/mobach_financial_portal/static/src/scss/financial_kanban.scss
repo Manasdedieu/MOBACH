@@ -1,0 +1,276 @@
+/* ================================================================
+   MOBACH Financial Performance Dashboard - Kanban Styles
+   ================================================================ */
+
+.o_kanban_renderer.o_account_kanban,
+.mobach_financial_dashboard_kanban {
+
+    .mobach-kanban-card {
+        background: #ffffff;
+        border-radius: 14px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        padding: 18px;
+        transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+        position: relative;
+        overflow: hidden;
+
+        &:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.09);
+            border-color: #cbd5e1;
+        }
+
+        /* En-tête de la carte */
+        .mobach-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .mobach-company-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .mobach-logo-wrapper {
+            width: 54px;
+            height: 54px;
+            min-width: 54px;
+            border-radius: 12px;
+            background: #ffffff;
+            border: 1.5px solid #e2e8f0;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+            overflow: hidden;
+
+            img {
+                max-width: 100%;
+                max-height: 100%;
+                object-fit: contain;
+            }
+        }
+
+        .mobach-company-name {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.25;
+        }
+
+        .mobach-company-subtitle {
+            font-size: 0.76rem;
+            color: #64748b;
+            margin: 2px 0 0 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .mobach-period-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            background-color: #f1f5f9;
+            color: #475569;
+            padding: 2px 8px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            margin-top: 4px;
+        }
+
+        /* Statut Badge */
+        .mobach-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+            flex-shrink: 0;
+
+            &.positive {
+                background-color: #dcfce7;
+                color: #15803d;
+                border: 1px solid #bbf7d0;
+            }
+
+            &.negative {
+                background-color: #fee2e2;
+                color: #b91c1c;
+                border: 1px solid #fecaca;
+            }
+
+            &.neutral {
+                background-color: #f1f5f9;
+                color: #475569;
+                border: 1px solid #e2e8f0;
+            }
+        }
+
+        /* Section Principale KPIs */
+        .mobach-kpis-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 14px 0;
+        }
+
+        .mobach-kpi-card {
+            padding: 10px 8px;
+            border-radius: 10px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+
+            .mobach-kpi-icon-title {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 5px;
+                font-size: 0.7rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.03em;
+            }
+
+            .mobach-kpi-value {
+                font-size: 1.05rem;
+                font-weight: 800;
+                margin-top: 4px;
+                line-height: 1.2;
+            }
+
+            .mobach-kpi-subtext {
+                font-size: 0.68rem;
+                margin-top: 2px;
+                font-weight: 500;
+            }
+
+            &.kpi-ca {
+                background-color: #f0fdf4;
+                border: 1px solid #dcfce7;
+                .mobach-kpi-icon-title { color: #166534; }
+                .mobach-kpi-value { color: #15803d; }
+                .mobach-kpi-subtext { color: #16a34a; }
+            }
+
+            &.kpi-depenses {
+                background-color: #fff1f2;
+                border: 1px solid #ffe4e6;
+                .mobach-kpi-icon-title { color: #9f1239; }
+                .mobach-kpi-value { color: #be123c; }
+                .mobach-kpi-subtext { color: #e11d48; }
+            }
+
+            &.kpi-marge-pos {
+                background-color: #ecfdf5;
+                border: 1px solid #a7f3d0;
+                .mobach-kpi-icon-title { color: #065f46; }
+                .mobach-kpi-value { color: #047857; }
+                .mobach-kpi-subtext { color: #059669; }
+            }
+
+            &.kpi-marge-neg {
+                background-color: #fef2f2;
+                border: 1px solid #fecaca;
+                .mobach-kpi-icon-title { color: #991b1b; }
+                .mobach-kpi-value { color: #b91c1c; }
+                .mobach-kpi-subtext { color: #dc2626; }
+            }
+        }
+
+        /* Barre Secondaire Encours & Liquidités */
+        .mobach-secondary-bar {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 8px 10px;
+            margin-bottom: 14px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            text-align: center;
+            gap: 6px;
+
+            .mobach-metric-item {
+                font-size: 0.72rem;
+
+                .metric-label {
+                    color: #64748b;
+                    font-weight: 600;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 4px;
+                }
+
+                .metric-val {
+                    font-weight: 700;
+                    color: #1e293b;
+                    margin-top: 2px;
+                    display: block;
+                    font-size: 0.8rem;
+                }
+            }
+        }
+
+        /* Pied de Carte et Actions */
+        .mobach-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 10px;
+            margin-top: 6px;
+
+            .btn-action-group {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+
+            .btn-action {
+                font-size: 0.75rem;
+                font-weight: 600;
+                padding: 4px 10px;
+                border-radius: 6px;
+                transition: all 0.15s ease;
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+            }
+
+            .btn-refresh {
+                font-size: 0.75rem;
+                color: #64748b;
+                text-decoration: none;
+                padding: 4px 8px;
+                border-radius: 4px;
+                transition: color 0.15s ease;
+
+                &:hover {
+                    color: #0f172a;
+                    background-color: #f1f5f9;
+                }
+            }
+        }
+    }
+}
