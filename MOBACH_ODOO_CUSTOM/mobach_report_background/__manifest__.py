@@ -19,6 +19,7 @@
     'category': 'Technical',
     'depends': ['web'],
     'data': [
+        'data/report_paperformat_data.xml',
         'views/base_document_layout_views.xml',
     ],
     'assets': {
@@ -26,6 +27,7 @@
             'mobach_report_background/static/src/scss/report_full_background.scss',
         ],
     },
+    'post_init_hook': 'post_init_hook',
     'installable': True,
     'application': False,
     'auto_install': False,

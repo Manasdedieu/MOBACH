@@ -38,6 +38,26 @@ couvrir l'en-tête ni le pied : aucun CSS ne peut déborder d'un document à l'a
 4. **`views/base_document_layout_views.xml`** : champ image visible et requis pour
    `full_page` dans l'assistant de mise en page, et onglet « Fond des rapports » sur la fiche société.
 
+## Image par défaut MOBACH
+
+`static/img/Composition1.png` (1240×1754 px, bande bordeaux à gauche) est le fond par défaut :
+
+- **Sociétés existantes** : `hooks.py` → `post_init_hook` passe toutes les sociétés en
+  `full_page` avec cette image. Il ne s'exécute **qu'à l'installation** (pas sur `-u`).
+- **Nouvelles sociétés** : `default='full_page'` sur `layout_background` et
+  `default=get_default_background_image()` sur `layout_background_image`.
+- À la désinstallation, `ondelete` remet `'Blank'` explicitement : `'set default'`
+  reprendrait `'full_page'`, qui est le défaut défini par ce module.
+- La bande occupe environ 2 à 9 % de la largeur (≈ 5–18 mm sur A4). D'où le format
+  **`paperformat_mobach_a4`** (`data/report_paperformat_data.xml`), une copie de
+  `base.paperformat_euro` avec `margin_left = 14` : 14 mm de marge wkhtmltopdf + 11 mm de
+  marge CSS (`css_margins`) mettent le texte à ≈ 25 mm du bord. `base.paperformat_euro` est
+  en `noupdate` et appartient au module base : ne pas le modifier.
+- Ce format est affecté à toutes les sociétés par le `post_init_hook` et, pour les nouvelles sociétés,
+  par le défaut `paperformat_id` de `res.company`.
+- Les rapports qui ont leur propre `paperformat_id` (par exemple la « Facture Mobach » de
+  `mobach_sale`, avec `mobach_sale_invoice_paperformat`) ne sont pas concernés : régler leur marge séparément si besoin.
+
 ## Pièges techniques (à ne pas casser)
 
 - **PyPDF2 2.12.1** est la version réellement utilisée (`odoo.tools.pdf` choisit
