@@ -15,7 +15,9 @@
         'data/account_tax_other_companies_data.xml',
         'views/account_tax_views.xml',
         'views/account_move_views.xml',
+        'views/account_payment_term_views.xml',
         'report/report_invoice_ir.xml',
+        'wizard/account_payment_register_views.xml',
     ],
     'assets': {
         'web.assets_backend': [

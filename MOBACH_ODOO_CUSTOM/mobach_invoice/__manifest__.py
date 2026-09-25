@@ -18,6 +18,7 @@
         'security/ir.model.access.csv',
         'wizard/account_move_discount_views.xml',
         'views/account_move_views.xml',
+        'data/cron_currency_update.xml',
     ],
     'installable': True,
     'application': False,

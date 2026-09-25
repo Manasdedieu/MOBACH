@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_account_payment_register_form_inherit_mobach_ir" model="ir.ui.view">
+        <field name="name">account.payment.register.form.inherit.mobach.ir</field>
+        <field name="model">account.payment.register</field>
+        <field name="inherit_id" ref="account.view_account_payment_register_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <field name="is_retenue_early_payment" invisible="1"/>
+                <field name="is_account_manager" invisible="1"/>
+            </xpath>
+            <xpath expr="//group" position="before">
+                <div class="alert alert-warning text-center" role="alert" 
+                     invisible="not is_retenue_early_payment or not is_account_manager">
+                    <strong>Attention :</strong> Vous effectuez un paiement anticipé pour une retenue dont le délai n'est pas encore expiré.
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>
