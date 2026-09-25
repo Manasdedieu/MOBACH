@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Rapports imprimés avec le fond pleine page MOBACH et le format A4 MOBACH.
+         Les autres rapports gardent leur comportement natif. -->
+    <record id="sale.action_report_saleorder" model="ir.actions.report">
+        <field name="paperformat_id" ref="paperformat_mobach_a4"/>
+        <field name="mobach_full_page_background" eval="True"/>
+    </record>
+    <record id="account.account_invoices" model="ir.actions.report">
+        <field name="paperformat_id" ref="paperformat_mobach_a4"/>
+        <field name="mobach_full_page_background" eval="True"/>
+    </record>
+    <record id="account.account_invoices_without_payment" model="ir.actions.report">
+        <field name="paperformat_id" ref="paperformat_mobach_a4"/>
+        <field name="mobach_full_page_background" eval="True"/>
+    </record>
+    <record id="sale_pdf_quote_builder.action_report_saleorder_raw" model="ir.actions.report">
+        <field name="paperformat_id" ref="paperformat_mobach_a4"/>
+        <field name="mobach_full_page_background" eval="True"/>
+    </record>
+</odoo>

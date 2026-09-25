@@ -3,7 +3,7 @@ import io
 import logging
 import re
 
-from odoo import models
+from odoo import fields, models
 from odoo.tools.pdf import NameObject, OdooPdfFileReader, OdooPdfFileWriter
 
 _logger = logging.getLogger(__name__)
@@ -14,6 +14,12 @@ COMPANY_LAYOUT_RE = re.compile(r'o_company_(\d+)_layout')
 
 class IrActionsReport(models.Model):
     _inherit = 'ir.actions.report'
+
+    mobach_full_page_background = fields.Boolean(
+        string="Fond pleine page MOBACH",
+        help="Applique l'image de fond « Pleine page » de la société sur toute la page PDF "
+             "(en-tête, corps et pied de page). Les rapports non cochés restent natifs.",
+    )
 
     def _run_wkhtmltopdf(self, bodies, report_ref=False, header=None, footer=None, landscape=False,
                          specific_paperformat_args=None, set_viewport_size=False):
@@ -26,6 +32,8 @@ class IrActionsReport(models.Model):
             specific_paperformat_args=specific_paperformat_args,
             set_viewport_size=set_viewport_size,
         )
+        if not report_ref or not self._get_report(report_ref).mobach_full_page_background:
+            return pdf_content
         company = self._get_full_page_background_company(bodies, header, footer)
         if not company:
             return pdf_content

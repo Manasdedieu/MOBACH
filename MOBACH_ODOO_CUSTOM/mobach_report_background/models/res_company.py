@@ -22,8 +22,3 @@ class ResCompany(models.Model):
         ondelete={'full_page': lambda companies: companies.write({'layout_background': 'Blank'})},
     )
     layout_background_image = fields.Binary(default=lambda self: get_default_background_image())
-    paperformat_id = fields.Many2one(default=lambda self: self._default_mobach_paperformat())
-
-    def _default_mobach_paperformat(self):
-        return (self.env.ref('mobach_report_background.paperformat_mobach_a4', raise_if_not_found=False)
-                or self.env.ref('base.paperformat_euro', raise_if_not_found=False))

@@ -11,15 +11,23 @@
         rendus dans trois zones séparées : un background CSS posé sur l'article ne
         peut donc jamais couvrir l'en-tête ni le pied de page.
 
+        Seuls les rapports cochés « Fond pleine page MOBACH » sont concernés : par
+        défaut le devis / bon de commande et les factures, qui utilisent aussi le
+        format papier A4 MOBACH. Les autres rapports restent natifs.
+
         Ce module applique l'image après la génération du PDF, sous le contenu de
         chaque page, sur toute la surface de la feuille. Fonctionne avec tous les
         external_layout (standard, boxed, bold, striped, folder, wave, bubble...).
     """,
     'author': 'MOBACH',
     'category': 'Technical',
-    'depends': ['web'],
+    # mobach_sale : champ « object » (Objet) et titres / objet qu'il ajoute aux rapports, masqués ici.
+    'depends': ['web', 'sale', 'account', 'sale_pdf_quote_builder', 'mobach_sale'],
     'data': [
         'data/report_paperformat_data.xml',
+        'data/ir_actions_report_data.xml',
+        'views/ir_actions_report_views.xml',
+        'views/report_templates.xml',
         'views/base_document_layout_views.xml',
     ],
     'assets': {
