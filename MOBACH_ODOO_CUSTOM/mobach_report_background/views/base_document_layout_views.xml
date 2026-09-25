@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_base_document_layout_full_background" model="ir.ui.view">
+        <field name="name">base.document.layout.form.full.background</field>
+        <field name="model">base.document.layout</field>
+        <field name="inherit_id" ref="web.view_base_document_layout"/>
+        <field name="arch" type="xml">
+            <field name="layout_background_image" position="attributes">
+                <attribute name="invisible">layout_background not in ('Custom', 'full_page')</attribute>
+                <attribute name="required">layout_background in ('Custom', 'full_page')</attribute>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_company_form_full_background" model="ir.ui.view">
+        <field name="name">res.company.form.full.background</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Fond des rapports" name="report_background">
+                    <group>
+                        <field name="layout_background" string="Fond"/>
+                        <field name="layout_background_image" widget="image"
+                               invisible="layout_background not in ('Custom', 'full_page')"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>
