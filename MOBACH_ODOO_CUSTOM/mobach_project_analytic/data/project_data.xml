@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="project_generic" model="project.project">
+            <field name="name">Générique</field>
+            <field name="privacy_visibility">portal</field>
+        </record>
+    </data>
+</odoo>

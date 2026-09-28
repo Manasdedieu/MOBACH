@@ -108,7 +108,7 @@ class SaleOrder(models.Model):
     def _compute_tax_totals(self):
         super()._compute_tax_totals()
         for order in self:
-            if order.tax_totals is None:
+            if not order.tax_totals or not isinstance(order.tax_totals, dict):
                 continue
             order.tax_totals['ir_tax_name'] = (
                 order.ir_tax_id.name if order.ir_tax_id else False

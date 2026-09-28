@@ -117,7 +117,7 @@ class AccountMove(models.Model):
         """
         super()._compute_tax_totals()
         for move in self:
-            if move.tax_totals is None:
+            if not move.is_invoice(include_receipts=True) or not move.tax_totals or not isinstance(move.tax_totals, dict):
                 continue
             # Injection des données IR dans le dict tax_totals
             move.tax_totals['ir_tax_name'] = (
@@ -127,4 +127,5 @@ class AccountMove(models.Model):
             move.tax_totals['amount_net_mandate'] = move.amount_net_mandate
             move.tax_totals['retenue_amount'] = move.retenue_amount
             move.tax_totals['has_ir'] = bool(move.ir_tax_id)
+
 

@@ -1,0 +1,6 @@
+// L'image de fond "Pleine page" est posée sous le contenu du PDF après le rendu
+// wkhtmltopdf : le fond blanc de bootstrap (body) la masquerait, on le rend
+// transparent. Sans image, une page transparente reste blanche à l'affichage.
+html, body {
+    background: transparent !important;
+}

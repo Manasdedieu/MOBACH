@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Tableaux de bord de performance financière du groupe MOBACH.
+
+        Un enregistrement par couple SOCIÉTÉ × PÉRIODE. Auparavant il n'existait
+        qu'une fiche par société, avec un champ `period` modifiable : le premier
+        utilisateur qui basculait sur « Mois en cours » changeait la période pour
+        tout le monde. Les quatre périodes sont désormais préinstanciées, et une
+        contrainte SQL garantit l'unicité du couple.
+
+        noupdate="1" : les fiches existantes ne sont pas réécrasées à chaque mise à
+        jour du module ; les nouvelles sont créées normalement.
+    -->
+    <data noupdate="1">
+
+        <!-- 1. MOBACH SARL (Société Principale) -->
+        <record id="financial_performance_mobach_sarl" model="mobach.financial.performance">
+            <field name="company_id" ref="base.main_company"/>
+            <field name="period">all</field>
+        </record>
+        <record id="financial_performance_mobach_sarl_month" model="mobach.financial.performance">
+            <field name="company_id" ref="base.main_company"/>
+            <field name="period">month</field>
+        </record>
+        <record id="financial_performance_mobach_sarl_quarter" model="mobach.financial.performance">
+            <field name="company_id" ref="base.main_company"/>
+            <field name="period">quarter</field>
+        </record>
+        <record id="financial_performance_mobach_sarl_year" model="mobach.financial.performance">
+            <field name="company_id" ref="base.main_company"/>
+            <field name="period">year</field>
+        </record>
+
+        <!-- 2. NAS ET FILS SARL -->
+        <record id="financial_performance_nas_et_fils" model="mobach.financial.performance">
+            <field name="company_id" ref="mobach_config.company_nas_et_fils"/>
+            <field name="period">all</field>
+        </record>
+        <record id="financial_performance_nas_et_fils_month" model="mobach.financial.performance">
+            <field name="company_id" ref="mobach_config.company_nas_et_fils"/>
+            <field name="period">month</field>
+        </record>
+        <record id="financial_performance_nas_et_fils_quarter" model="mobach.financial.performance">
+            <field name="company_id" ref="mobach_config.company_nas_et_fils"/>
+            <field name="period">quarter</field>
+        </record>
+        <record id="financial_performance_nas_et_fils_year" model="mobach.financial.performance">
+            <field name="company_id" ref="mobach_config.company_nas_et_fils"/>
+            <field name="period">year</field>
+        </record>
+
+        <!-- 3. MOHAMADOU BACHIROU SARL -->
+        <record id="financial_performance_mohamadou_bachirou" model="mobach.financial.performance">
+            <field name="company_id" ref="mobach_config.company_mohamadou_bachirou"/>
+            <field name="period">all</field>
+        </record>
+        <record id="financial_performance_mohamadou_bachirou_month" model="mobach.financial.performance">
+            <field name="company_id" ref="mobach_config.company_mohamadou_bachirou"/>
+            <field name="period">month</field>
+        </record>
+        <record id="financial_performance_mohamadou_bachirou_quarter" model="mobach.financial.performance">
+            <field name="company_id" ref="mobach_config.company_mohamadou_bachirou"/>
+            <field name="period">quarter</field>
+        </record>
+        <record id="financial_performance_mohamadou_bachirou_year" model="mobach.financial.performance">
+            <field name="company_id" ref="mobach_config.company_mohamadou_bachirou"/>
+            <field name="period">year</field>
+        </record>
+
+        <!-- 4. AFRIDRIVE SARL -->
+        <record id="financial_performance_afridrive" model="mobach.financial.performance">
+            <field name="company_id" ref="mobach_config.company_afridrive"/>
+            <field name="period">all</field>
+        </record>
+        <record id="financial_performance_afridrive_month" model="mobach.financial.performance">
+            <field name="company_id" ref="mobach_config.company_afridrive"/>
+            <field name="period">month</field>
+        </record>
+        <record id="financial_performance_afridrive_quarter" model="mobach.financial.performance">
+            <field name="company_id" ref="mobach_config.company_afridrive"/>
+            <field name="period">quarter</field>
+        </record>
+        <record id="financial_performance_afridrive_year" model="mobach.financial.performance">
+            <field name="company_id" ref="mobach_config.company_afridrive"/>
+            <field name="period">year</field>
+        </record>
+
+    </data>
+</odoo>

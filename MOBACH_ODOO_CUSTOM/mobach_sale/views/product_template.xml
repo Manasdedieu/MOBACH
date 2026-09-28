@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="product_template_form_view_accounting_nature" model="ir.ui.view">
+        <field name="name">product.template.form.accounting.nature</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <field name="categ_id" position="after">
+                <label for="accounting_nature"/>
+                <div class="o_row">
+                    <field name="accounting_nature" widget="radio" options="{'horizontal': True}"/>
+                    <button name="action_clear_accounting_nature" type="object"
+                            icon="fa-times" class="btn-link text-muted p-0"
+                            title="Effacer la nature comptable"
+                            invisible="not accounting_nature"/>
+                </div>
+            </field>
+        </field>
+    </record>
+
+    <record id="product_template_list_view_accounting_nature" model="ir.ui.view">
+        <field name="name">product.template.list.accounting.nature</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_tree_view"/>
+        <field name="arch" type="xml">
+            <field name="categ_id" position="after">
+                <field name="accounting_nature" optional="show" widget="badge"
+                       decoration-info="accounting_nature == 'charge'"
+                       decoration-warning="accounting_nature == 'immobilisation'"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="product_template_search_view_accounting_nature" model="ir.ui.view">
+        <field name="name">product.template.search.accounting.nature</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_search_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <separator/>
+                <filter string="Charges" name="filter_nature_charge"
+                        domain="[('accounting_nature', '=', 'charge')]"/>
+                <filter string="Immobilisations" name="filter_nature_immobilisation"
+                        domain="[('accounting_nature', '=', 'immobilisation')]"/>
+                <filter string="Nature comptable" name="groupby_accounting_nature"
+                        context="{'group_by': 'accounting_nature'}"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

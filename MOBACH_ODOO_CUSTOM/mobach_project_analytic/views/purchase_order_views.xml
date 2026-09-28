@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ================================================================
+         BON DE COMMANDE FOURNISSEUR : projet en en-tête et sur chaque ligne
+    ================================================================ -->
+    <record id="purchase_order_form_mobach_project" model="ir.ui.view">
+        <field name="name">purchase.order.form.mobach.project</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Masquer l'ancien project_id (après origin) posé par project_purchase -->
+            <xpath expr="//field[@name='origin']/following-sibling::field[@name='project_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <!-- En-tête : projet affiché après payment_term_id -->
+            <field name="payment_term_id" position="after">
+                <field name="project_id"
+                       groups="analytic.group_analytic_accounting"
+                       options="{'no_create_edit': True}"/>
+            </field>
+
+            <!-- Lignes de commande -->
+            <xpath expr="//field[@name='order_line']//list//field[@name='analytic_distribution']" position="before">
+                <field name="project_id"
+                       optional="show"
+                       groups="analytic.group_analytic_accounting"
+                       options="{'no_create_edit': True}"/>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

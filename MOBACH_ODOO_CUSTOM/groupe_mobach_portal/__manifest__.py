@@ -13,7 +13,7 @@ Ce module remplace la page d\'accueil par défaut d\'Odoo par un portail d\'accu
     """,
     'author': 'ATTALA',
     'category': 'Website',
-    'depends': ['web', 'portal'],
+    'depends': ['web', 'portal', 'mobach_config'],
     'data': [
         'security/ir.model.access.csv',
         'views/res_company_views.xml',

@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_mobach_financial_performance_user,mobach.financial.performance.user,model_mobach_financial_performance,account.group_account_invoice,1,1,1,1
+access_mobach_financial_performance_manager,mobach.financial.performance.manager,model_mobach_financial_performance,account.group_account_manager,1,1,1,1

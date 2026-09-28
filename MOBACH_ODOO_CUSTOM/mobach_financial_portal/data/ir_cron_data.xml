@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Cron historique de rafraîchissement des KPI, désormais DÉSACTIVÉ.
+
+        Il existait parce que les indicateurs de mobach.financial.performance étaient
+        stockés (store=True) sans pouvoir dépendre de account.move : il fallait un
+        déclencheur externe, et les chiffres restaient donc faux jusqu'à 15 minutes.
+
+        Les KPI sont maintenant calculés à la volée (store=False) à chaque affichage.
+        Le cron n'a plus d'objet et est désactivé.
+
+        noupdate="0" (contrairement à la version précédente) est délibéré : c'est ce
+        qui permet à la mise à jour du module de réellement désactiver le cron déjà
+        présent en base. Avec noupdate="1", l'enregistrement existant aurait été
+        laissé intact — donc toujours actif.
+    -->
+    <data noupdate="0">
+
+        <record id="cron_refresh_financial_kpis" model="ir.cron">
+            <field name="name">MOBACH — Rafraîchir les KPI financiers (obsolète)</field>
+            <field name="model_id" ref="model_mobach_financial_performance"/>
+            <field name="state">code</field>
+            <field name="code">model.sudo().search([]).action_refresh_kpis()</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="active" eval="False"/>
+        </record>
+
+    </data>
+</odoo>

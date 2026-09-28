@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Copie de base.paperformat_euro avec une marge gauche élargie : la bande bordeaux
+         du fond par défaut (Composition1.png) occupe les ~18 premiers mm de la page.
+         14 mm de marge + 11 mm de marge CSS (css_margins) = texte à ~25 mm du bord. -->
+    <record id="paperformat_mobach_a4" model="report.paperformat">
+        <field name="name">A4 MOBACH</field>
+        <field name="default" eval="False"/>
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">40</field>
+        <field name="margin_bottom">32</field>
+        <field name="margin_left">14</field>
+        <field name="margin_right">0</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">40</field>
+        <field name="dpi">90</field>
+        <field name="css_margins" eval="True"/>
+    </record>
+</odoo>
