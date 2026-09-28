@@ -25,4 +25,18 @@
         </field>
     </record>
 
+    <!-- Nature comptable (charge / immobilisation) en surbrillance sur les lignes -->
+    <record id="view_order_form_inherit_accounting_nature" model="ir.ui.view">
+        <field name="name">sale.order.form.inherit.accounting.nature</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='order_line']/list/field[@name='product_template_id']" position="after">
+                <field name="accounting_nature" string="Nature" optional="show" widget="badge"
+                       decoration-info="accounting_nature == 'charge'"
+                       decoration-warning="accounting_nature == 'immobilisation'"/>
+            </xpath>
+        </field>
+    </record>
+
 </odoo>
