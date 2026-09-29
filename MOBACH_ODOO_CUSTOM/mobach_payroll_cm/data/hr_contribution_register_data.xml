@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Registres de contribution / Organismes sociaux et fiscaux du Cameroun -->
+    <record id="contrib_register_cnps" model="hr.contribution.register">
+        <field name="name">Caisse Nationale de Prévoyance Sociale (CNPS)</field>
+        <field name="note">Cotisations sociales PVI, Prestations familiales et Accidents de travail</field>
+    </record>
+
+    <record id="contrib_register_dgi" model="hr.contribution.register">
+        <field name="name">Direction Générale des Impôts (DGI / Trésor Public)</field>
+        <field name="note">Retenues fiscales à la source : IRPP, RAV (CRTV)</field>
+    </record>
+
+    <record id="contrib_register_commune" model="hr.contribution.register">
+        <field name="name">Collectivités Territoriales Décentralisées (Mairies / Communes)</field>
+        <field name="note">Taxe de Développement Communal (TDC) et Centimes Additionnels Communaux (CAC)</field>
+    </record>
+
+    <record id="contrib_register_cfc" model="hr.contribution.register">
+        <field name="name">Crédit Foncier du Cameroun (CFC)</field>
+        <field name="note">Part salariale (1%) et part patronale (1,5%)</field>
+    </record>
+
+    <record id="contrib_register_fne" model="hr.contribution.register">
+        <field name="name">Fonds National de l'Emploi (FNE)</field>
+        <field name="note">Contribution patronale (1%) pour la promotion de l'emploi</field>
+    </record>
+
+    <record id="contrib_register_employees" model="hr.contribution.register">
+        <field name="name">Salariés (Règlement Net)</field>
+        <field name="note">Virements des salaires nets au personnel</field>
+    </record>
+</odoo>

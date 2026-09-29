@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Structure Salariale Standard Cameroun -->
+    <record id="structure_cm_standard" model="hr.payroll.structure">
+        <field name="name">Structure Salariale Standard - Cameroun (SYSCOHADA)</field>
+        <field name="code">CM_STD</field>
+        <field name="company_id" ref="base.main_company" />
+        <field name="note">Structure de paie applicable aux salariés sous législation camerounaise (CNPS, IRPP, CAC, CFC, RAV, TDC, FNE)</field>
+        <field
+            eval="[(6, 0, [
+                ref('rule_basic_cm'),
+                ref('rule_sursal_cm'),
+                ref('rule_prime_anc_cm'),
+                ref('rule_prime_div_cm'),
+                ref('rule_ind_trans_cm'),
+                ref('rule_gross_cm'),
+                ref('rule_cnps_sal_cm'),
+                ref('rule_cfc_sal_cm'),
+                ref('rule_rav_cm'),
+                ref('rule_tdc_cm'),
+                ref('rule_base_irpp_cm'),
+                ref('rule_irpp_cm'),
+                ref('rule_cac_cm'),
+                ref('rule_avance_cm'),
+                ref('rule_net_cm'),
+                ref('rule_cnps_pat_cm'),
+                ref('rule_cnps_pf_cm'),
+                ref('rule_cnps_at_cm'),
+                ref('rule_cfc_pat_cm'),
+                ref('rule_fne_pat_cm'),
+            ])]"
+            name="rule_ids"
+        />
+    </record>
+</odoo>

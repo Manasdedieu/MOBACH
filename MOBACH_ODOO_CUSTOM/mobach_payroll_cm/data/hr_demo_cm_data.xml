@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- ============================================================ -->
+    <!--  EMPLOYÉS DE DÉMONSTRATION ET DE TEST POUR LA PAIE CAMEROUN  -->
+    <!-- ============================================================ -->
+
+    <!-- Employé 1 : Paul TCHAMBA - Salaire Standard (250 000 FCFA) -->
+    <record id="hr_employee_cm_tchamba" model="hr.employee">
+        <field name="name">Paul TCHAMBA</field>
+        <field name="job_title">Technicien Support</field>
+        <field name="work_phone">+237 690 11 22 33</field>
+        <field name="work_email">p.tchamba@mobach.cm</field>
+        <field name="company_id" ref="base.main_company" />
+        <field eval="1" name="active" />
+        <field name="date_version" eval="time.strftime('%Y-%m')+'-01'" />
+        <field name="contract_date_start" eval="time.strftime('%Y-%m')+'-01'" />
+        <field name="struct_id" ref="structure_cm_standard" />
+        <field eval="250000.0" name="wage" />
+        <field name="additional_note">Contrat de test - Salaire standard (250 000 FCFA) pour tester CNPS, IRPP tranche 1, CFC, RAV et TDC</field>
+    </record>
+
+    <!-- Employé 2 : Aminatou BOUBA - Salaire Cadre avec Ancienneté (850 000 FCFA) -->
+    <record id="hr_employee_cm_bouba" model="hr.employee">
+        <field name="name">Aminatou BOUBA</field>
+        <field name="job_title">Responsable Administratif et Financier</field>
+        <field name="work_phone">+237 699 44 55 66</field>
+        <field name="work_email">a.bouba@mobach.cm</field>
+        <field name="company_id" ref="base.main_company" />
+        <field eval="1" name="active" />
+        <field name="date_version" eval="time.strftime('%Y-%m')+'-01'" />
+        <field name="contract_date_start">2023-01-01</field>
+        <field name="struct_id" ref="structure_cm_standard" />
+        <field eval="850000.0" name="wage" />
+        <field name="additional_note">Contrat de test - Salaire cadre (850 000 FCFA) pour tester le plafonnement CNPS à 750 000 FCFA, l'ancienneté (>3 ans) et les tranches hautes d'IRPP</field>
+    </record>
+</odoo>

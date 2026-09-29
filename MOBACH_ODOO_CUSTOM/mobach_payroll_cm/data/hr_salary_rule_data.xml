@@ -1,0 +1,391 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- ============================================================ -->
+    <!--  RÈGLES SALARIALES DU CAMEROUN (SYSCOHADA / CGI CAMEROUN)    -->
+    <!-- ============================================================ -->
+
+    <!-- 1. SALAIRE DE BASE -->
+    <record id="rule_basic_cm" model="hr.salary.rule">
+        <field name="name">Salaire de Base</field>
+        <field name="sequence" eval="1" />
+        <field name="code">BASIC</field>
+        <field name="category_id" ref="category_basic" />
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">
+result = contract.wage
+        </field>
+        <field name="note">Salaire de base négocié sur le contrat</field>
+    </record>
+
+    <!-- 2. SURSALAIRE -->
+    <record id="rule_sursal_cm" model="hr.salary.rule">
+        <field name="name">Sursalaire</field>
+        <field name="sequence" eval="5" />
+        <field name="code">SUR_SAL</field>
+        <field name="category_id" ref="category_alw" />
+        <field name="condition_select">python</field>
+        <field name="condition_python">
+result = bool(inputs.SURSAL and inputs.SURSAL.amount)
+        </field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">
+result = inputs.SURSAL.amount if inputs.SURSAL else 0.0
+        </field>
+        <field name="note">Complément de rémunération contractuel ou variable</field>
+    </record>
+
+    <!-- 3. PRIME D'ANCIENNETÉ -->
+    <record id="rule_prime_anc_cm" model="hr.salary.rule">
+        <field name="name">Prime d'Ancienneté</field>
+        <field name="sequence" eval="10" />
+        <field name="code">ANC</field>
+        <field name="category_id" ref="category_alw" />
+        <field name="condition_select">python</field>
+        <field name="condition_python">
+start = contract.date_start
+result = bool(start and payslip.date_to and ((payslip.date_to - start).days // 365) >= 2)
+        </field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">
+start = contract.date_start
+if start and payslip.date_to:
+    years = (payslip.date_to - start).days // 365
+    if years >= 2:
+        rate = 0.04 + (years - 2) * 0.01
+        result = contract.wage * rate
+    else:
+        result = 0.0
+else:
+    result = 0.0
+        </field>
+        <field name="note">Règle légale Cameroun : 4% après 2 ans, +1% par an supplémentaire</field>
+    </record>
+
+    <!-- 4. PRIMES DIVERSES IMPOSABLES -->
+    <record id="rule_prime_div_cm" model="hr.salary.rule">
+        <field name="name">Primes et Gratifications</field>
+        <field name="sequence" eval="20" />
+        <field name="code">PRIME</field>
+        <field name="category_id" ref="category_alw" />
+        <field name="condition_select">python</field>
+        <field name="condition_python">
+result = bool(inputs.PRIME and inputs.PRIME.amount)
+        </field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">
+result = inputs.PRIME.amount if inputs.PRIME else 0.0
+        </field>
+        <field name="note">Primes diverses imposables saisies pour le mois</field>
+    </record>
+
+    <!-- 5. INDEMNITÉ DE TRANSPORT (EXONÉRÉE) -->
+    <record id="rule_ind_trans_cm" model="hr.salary.rule">
+        <field name="name">Indemnité de Transport (Exonérée)</field>
+        <field name="sequence" eval="30" />
+        <field name="code">IND_TRANS</field>
+        <field name="category_id" ref="category_non_imp" />
+        <field name="condition_select">python</field>
+        <field name="condition_python">
+result = bool(inputs.IND_TRANS and inputs.IND_TRANS.amount)
+        </field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">
+result = inputs.IND_TRANS.amount if inputs.IND_TRANS else 0.0
+        </field>
+        <field name="note">Indemnité forfaitaire de transport exonérée</field>
+    </record>
+
+    <!-- 6. SALAIRE BRUT IMPOSABLE -->
+    <record id="rule_gross_cm" model="hr.salary.rule">
+        <field name="name">Salaire Brut Imposable</field>
+        <field name="sequence" eval="100" />
+        <field name="code">GROSS</field>
+        <field name="category_id" ref="category_gross" />
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">
+result = categories.BASIC + categories.ALW
+        </field>
+        <field name="note">Total brut imposable et cotisable</field>
+    </record>
+
+    <!-- 7. CNPS PENSION VIEILLESSE (PVI 4,2% PLAFONNÉ À 750 000 FCFA) -->
+    <record id="rule_cnps_sal_cm" model="hr.salary.rule">
+        <field name="name">CNPS - Pension Vieillesse (4,2%)</field>
+        <field name="sequence" eval="110" />
+        <field name="code">CNPS_PVI_SAL</field>
+        <field name="category_id" ref="category_ded" />
+        <field name="register_id" ref="contrib_register_cnps" />
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">
+base_cnps = min(categories.GROSS, 750000.0)
+result = - round(base_cnps * 0.042)
+        </field>
+        <field name="note">Cotisation salariale CNPS 4,2% avec plafond mensuel légal de 750 000 FCFA</field>
+    </record>
+
+    <!-- 8. CRÉDIT FONCIER DU CAMEROUN (CFC 1%) -->
+    <record id="rule_cfc_sal_cm" model="hr.salary.rule">
+        <field name="name">Crédit Foncier du Cameroun - Part Salariale (1%)</field>
+        <field name="sequence" eval="120" />
+        <field name="code">CFC_SAL</field>
+        <field name="category_id" ref="category_ded" />
+        <field name="register_id" ref="contrib_register_cfc" />
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">
+result = - round(categories.GROSS * 0.01)
+        </field>
+        <field name="note">Contribution salariale CFC 1% sur le brut imposable</field>
+    </record>
+
+    <!-- 9. REDEVANCE AUDIO-VISUELLE (RAV / CRTV) -->
+    <record id="rule_rav_cm" model="hr.salary.rule">
+        <field name="name">Redevance Audio-Visuelle (RAV / CRTV)</field>
+        <field name="sequence" eval="125" />
+        <field name="code">RAV</field>
+        <field name="category_id" ref="category_ded" />
+        <field name="register_id" ref="contrib_register_dgi" />
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">
+brut = categories.GROSS
+if brut &lt;= 50000:
+    val = 0.0
+elif brut &lt;= 100000:
+    val = 750.0
+elif brut &lt;= 200000:
+    val = 1950.0
+elif brut &lt;= 300000:
+    val = 3250.0
+elif brut &lt;= 400000:
+    val = 4550.0
+elif brut &lt;= 500000:
+    val = 5850.0
+elif brut &lt;= 600000:
+    val = 7150.0
+elif brut &lt;= 700000:
+    val = 8450.0
+elif brut &lt;= 800000:
+    val = 9750.0
+elif brut &lt;= 900000:
+    val = 11050.0
+elif brut &lt;= 1000000:
+    val = 12350.0
+else:
+    val = 13000.0
+result = - val
+        </field>
+        <field name="note">Barème mensuel officiel de la Redevance Audio-Visuelle</field>
+    </record>
+
+    <!-- 10. TAXE DE DÉVELOPPEMENT COMMUNAL (TDC) -->
+    <record id="rule_tdc_cm" model="hr.salary.rule">
+        <field name="name">Taxe de Développement Communal (TDC)</field>
+        <field name="sequence" eval="130" />
+        <field name="code">TDC</field>
+        <field name="category_id" ref="category_ded" />
+        <field name="register_id" ref="contrib_register_commune" />
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">
+base_val = contract.wage
+if base_val &lt; 62000:
+    val = 0.0
+elif base_val &lt;= 75000:
+    val = 250.0
+elif base_val &lt;= 100000:
+    val = 500.0
+elif base_val &lt;= 150000:
+    val = 1000.0
+elif base_val &lt;= 200000:
+    val = 1500.0
+elif base_val &lt;= 300000:
+    val = 2000.0
+elif base_val &lt;= 500000:
+    val = 2500.0
+else:
+    val = 3000.0
+result = - val
+        </field>
+        <field name="note">Taxe communale mensuelle selon barème CGI Cameroun</field>
+    </record>
+
+    <!-- 11. BASE IMPOSABLE IRPP (INTERMÉDIAIRE INFORMATIF) -->
+    <record id="rule_base_irpp_cm" model="hr.salary.rule">
+        <field name="name">Base Nette Imposable IRPP</field>
+        <field name="sequence" eval="135" />
+        <field name="code">BASE_IRPP</field>
+        <field name="category_id" ref="category_info" />
+        <field name="appears_on_payslip" eval="False" />
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">
+brut = categories.GROSS
+if brut &lt;= 62000:
+    result = 0.0
+else:
+    cnps_val = min(brut, 750000.0) * 0.042
+    net_apres_cnps = brut - cnps_val
+    net_apres_frais = net_apres_cnps * 0.70
+    abattement_fixe = 500000.0 / 12.0
+    result = max(0.0, net_apres_frais - abattement_fixe)
+        </field>
+        <field name="note">Base intermédiaire pour calcul de l'IRPP (après abattement CNPS, 30% frais pro et 41 667 FCFA)</field>
+    </record>
+
+    <!-- 12. IRPP (IMPÔT SUR LE REVENU DES PERSONNES PHYSIQUES) -->
+    <record id="rule_irpp_cm" model="hr.salary.rule">
+        <field name="name">Impôt sur le Revenu (IRPP)</field>
+        <field name="sequence" eval="140" />
+        <field name="code">IRPP</field>
+        <field name="category_id" ref="category_ded" />
+        <field name="register_id" ref="contrib_register_dgi" />
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">
+base_imp = BASE_IRPP
+if base_imp &lt;= 0:
+    irpp = 0.0
+else:
+    t1 = min(base_imp, 166667.0) * 0.10
+    t2 = max(0.0, min(base_imp - 166667.0, 83333.0)) * 0.15
+    t3 = max(0.0, min(base_imp - 250000.0, 166667.0)) * 0.25
+    t4 = max(0.0, base_imp - 416667.0) * 0.35
+    irpp = t1 + t2 + t3 + t4
+result = - round(irpp)
+        </field>
+        <field name="note">Barème mensuel progressif de l'IRPP Cameroun (10%, 15%, 25%, 35%)</field>
+    </record>
+
+    <!-- 13. CENTIMES ADDITIONNELS COMMUNAUX (CAC 10% IRPP) -->
+    <record id="rule_cac_cm" model="hr.salary.rule">
+        <field name="name">Centimes Additionnels Communaux (CAC 10%)</field>
+        <field name="sequence" eval="145" />
+        <field name="code">CAC</field>
+        <field name="category_id" ref="category_ded" />
+        <field name="register_id" ref="contrib_register_commune" />
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">
+result = - round(abs(IRPP) * 0.10)
+        </field>
+        <field name="note">CAC calculés à raison de 10% sur le montant de l'IRPP</field>
+    </record>
+
+    <!-- 14. ACOMPTE / AVANCE SUR SALAIRE -->
+    <record id="rule_avance_cm" model="hr.salary.rule">
+        <field name="name">Avance sur Salaire / Acompte</field>
+        <field name="sequence" eval="180" />
+        <field name="code">AVANCE</field>
+        <field name="category_id" ref="category_ded" />
+        <field name="condition_select">python</field>
+        <field name="condition_python">
+result = bool(inputs.AVANCE and inputs.AVANCE.amount)
+        </field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">
+result = - abs(inputs.AVANCE.amount) if inputs.AVANCE else 0.0
+        </field>
+        <field name="note">Déduction des acomptes ou avances versés pendant le mois</field>
+    </record>
+
+    <!-- 15. SALAIRE NET À PAYER -->
+    <record id="rule_net_cm" model="hr.salary.rule">
+        <field name="name">Salaire Net à Payer</field>
+        <field name="sequence" eval="200" />
+        <field name="code">NET</field>
+        <field name="category_id" ref="category_net" />
+        <field name="register_id" ref="contrib_register_employees" />
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">
+result = categories.BASIC + categories.ALW + categories.DED + categories.NON_IMP
+        </field>
+        <field name="note">Net à payer au salarié (Brut + Indemnités non imposables - Retenues)</field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!--  CHARGES SOCIALES ET FISCALES PATRONALES                     -->
+    <!-- ============================================================ -->
+
+    <!-- 16. CNPS PVI PATRONALE (4,2% PLAFONNÉ À 750 000 FCFA) -->
+    <record id="rule_cnps_pat_cm" model="hr.salary.rule">
+        <field name="name">CNPS - Pension Patronale (4,2%)</field>
+        <field name="sequence" eval="300" />
+        <field name="code">CNPS_PVI_PAT</field>
+        <field name="category_id" ref="category_comp" />
+        <field name="register_id" ref="contrib_register_cnps" />
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">
+base_cnps = min(categories.GROSS, 750000.0)
+result = round(base_cnps * 0.042)
+        </field>
+        <field name="note">Charge patronale CNPS PVI 4,2% plafonnée à 750 000 FCFA</field>
+    </record>
+
+    <!-- 17. CNPS PRESTATIONS FAMILIALES (7% PLAFONNÉ À 750 000 FCFA) -->
+    <record id="rule_cnps_pf_cm" model="hr.salary.rule">
+        <field name="name">CNPS - Prestations Familiales (7%)</field>
+        <field name="sequence" eval="310" />
+        <field name="code">CNPS_PF_PAT</field>
+        <field name="category_id" ref="category_comp" />
+        <field name="register_id" ref="contrib_register_cnps" />
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">
+base_cnps = min(categories.GROSS, 750000.0)
+result = round(base_cnps * 0.07)
+        </field>
+        <field name="note">Charge patronale CNPS Prestations Familiales 7% plafonnée à 750 000 FCFA</field>
+    </record>
+
+    <!-- 18. CNPS ACCIDENTS DU TRAVAIL (2,5% RISQUE MOYEN) -->
+    <record id="rule_cnps_at_cm" model="hr.salary.rule">
+        <field name="name">CNPS - Accidents du Travail (2,5%)</field>
+        <field name="sequence" eval="320" />
+        <field name="code">CNPS_AT_PAT</field>
+        <field name="category_id" ref="category_comp" />
+        <field name="register_id" ref="contrib_register_cnps" />
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">
+base_cnps = min(categories.GROSS, 750000.0)
+result = round(base_cnps * 0.025)
+        </field>
+        <field name="note">Charge patronale CNPS Accidents du travail (taux moyen 2,5%)</field>
+    </record>
+
+    <!-- 19. CRÉDIT FONCIER PATRONAL (1,5% NON PLAFONNÉ) -->
+    <record id="rule_cfc_pat_cm" model="hr.salary.rule">
+        <field name="name">Crédit Foncier du Cameroun - Part Patronale (1,5%)</field>
+        <field name="sequence" eval="330" />
+        <field name="code">CFC_PAT</field>
+        <field name="category_id" ref="category_comp" />
+        <field name="register_id" ref="contrib_register_cfc" />
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">
+result = round(categories.GROSS * 0.015)
+        </field>
+        <field name="note">Charge patronale CFC 1,5% sur le brut imposable total</field>
+    </record>
+
+    <!-- 20. FONDS NATIONAL DE L'EMPLOI (FNE 1% NON PLAFONNÉ) -->
+    <record id="rule_fne_pat_cm" model="hr.salary.rule">
+        <field name="name">Fonds National de l'Emploi - FNE (1%)</field>
+        <field name="sequence" eval="340" />
+        <field name="code">FNE_PAT</field>
+        <field name="category_id" ref="category_comp" />
+        <field name="register_id" ref="contrib_register_fne" />
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">
+result = round(categories.GROSS * 0.01)
+        </field>
+        <field name="note">Charge patronale FNE 1% sur le brut total</field>
+    </record>
+</odoo>
