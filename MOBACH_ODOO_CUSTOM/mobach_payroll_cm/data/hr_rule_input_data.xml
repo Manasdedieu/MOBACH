@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Types d'entrées manuelles pour les bulletins de salaire -->
+    <record id="input_sursal" model="hr.rule.input">
+        <field name="name">Sursalaire mensuel</field>
+        <field name="code">SURSAL</field>
+        <field name="input_id" ref="rule_sursal_cm" />
+    </record>
+
+    <record id="input_prime" model="hr.rule.input">
+        <field name="name">Prime exceptionnelle / Gratification</field>
+        <field name="code">PRIME</field>
+        <field name="input_id" ref="rule_prime_div_cm" />
+    </record>
+
+    <record id="input_ind_trans" model="hr.rule.input">
+        <field name="name">Indemnité forfaitaire de transport</field>
+        <field name="code">IND_TRANS</field>
+        <field name="input_id" ref="rule_ind_trans_cm" />
+    </record>
+
+    <record id="input_avance" model="hr.rule.input">
+        <field name="name">Avance sur salaire / Acompte décaissé</field>
+        <field name="code">AVANCE</field>
+        <field name="input_id" ref="rule_avance_cm" />
+    </record>
+</odoo>

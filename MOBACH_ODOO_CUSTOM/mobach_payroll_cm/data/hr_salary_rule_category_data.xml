@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Catégories de Règles Salariales pour le Cameroun -->
+    <record id="category_basic" model="hr.salary.rule.category">
+        <field name="name">Salaire de Base</field>
+        <field name="code">BASIC</field>
+        <field name="note">Salaire contractuel de base</field>
+    </record>
+
+    <record id="category_alw" model="hr.salary.rule.category">
+        <field name="name">Primes et Indemnités Imposables</field>
+        <field name="code">ALW</field>
+        <field name="note">Primes de rendement, ancienneté, sursalaire, etc.</field>
+    </record>
+
+    <record id="category_non_imp" model="hr.salary.rule.category">
+        <field name="name">Indemnités Non Imposables (Exonérées)</field>
+        <field name="code">NON_IMP</field>
+        <field name="note">Indemnités forfaitaires exonérées dans la limite légale (ex: transport)</field>
+    </record>
+
+    <record id="category_gross" model="hr.salary.rule.category">
+        <field name="name">Salaire Brut Imposable</field>
+        <field name="code">GROSS</field>
+        <field name="note">Total du salaire brut imposable (BASIC + ALW)</field>
+    </record>
+
+    <record id="category_ded" model="hr.salary.rule.category">
+        <field name="name">Retenues Salariales</field>
+        <field name="code">DED</field>
+        <field name="note">Total des cotisations sociales (CNPS) et fiscales (IRPP, CAC, CFC, RAV, TDC, Avances)</field>
+    </record>
+
+    <record id="category_info" model="hr.salary.rule.category">
+        <field name="name">Informations &amp; Bases de Calcul</field>
+        <field name="code">INFO</field>
+        <field name="note">Bases intermédiaires (ex: Base imposable IRPP)</field>
+    </record>
+
+    <record id="category_net" model="hr.salary.rule.category">
+        <field name="name">Salaire Net à Payer</field>
+        <field name="code">NET</field>
+        <field name="note">Montant net versé à l'employé</field>
+    </record>
+
+    <record id="category_comp" model="hr.salary.rule.category">
+        <field name="name">Charges Patronales</field>
+        <field name="code">COMP</field>
+        <field name="note">Cotisations patronales (CNPS PVI, Prestations Familiales, Accidents Travail, CFC, FNE)</field>
+    </record>
+</odoo>
