@@ -18,8 +18,15 @@
         'security/ir.model.access.csv',
         'wizard/account_move_discount_views.xml',
         'views/account_move_views.xml',
-        'data/cron_currency_update.xml',
+        'views/sale_order_views.xml',
+        'report/report_discount_totals.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'mobach_invoice/static/src/components/discount_totals/discount_totals.xml',
+            'mobach_invoice/static/src/components/discount_totals/discount_totals.js',
+        ],
+    },
     'installable': True,
     'application': False,
     'auto_install': False,
