@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Montant en lettres des devis / factures : « … Francs CFA » au lieu de « … Franc ».
+         currency_unit_label est traduisible : on fixe la valeur pour l'anglais et le français.
+         base.XAF est en noupdate dans base, une mise à jour de base ne l'écrase donc pas. -->
+    <function model="res.currency" name="update_field_translations">
+        <value eval="[ref('base.XAF')]"/>
+        <value>currency_unit_label</value>
+        <value eval="{'en_US': 'Francs CFA', 'fr_FR': 'Francs CFA'}"/>
+    </function>
+</odoo>

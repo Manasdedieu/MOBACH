@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- NUI / RCCM : synchronisés avec le N° TVA et le Company ID (voir models/res_partner.py). -->
+    <record id="view_partner_form_nui_rccm" model="ir.ui.view">
+        <field name="name">res.partner.form.nui.rccm</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group//field[@name='vat']" position="after">
+                <field name="nui" readonly="parent_id"/>
+                <field name="rccm" readonly="parent_id"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

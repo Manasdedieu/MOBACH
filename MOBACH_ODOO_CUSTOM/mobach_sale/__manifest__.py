@@ -9,10 +9,12 @@
     'depends': ['hr', 'mobach_invoice_ir', 'sale_management', 'mobach_invoice'],
     'data': [
         'security/ir.model.access.csv',
+        'data/res_currency_data.xml',
         'views/sale_order.xml',
         'views/account_move.xml',
         'views/hr_employee.xml',
         'views/product_template.xml',
+        'views/res_partner.xml',
         'report/report_invoice_.xml',
         'report/sale_report_templates.xml',
     ],
