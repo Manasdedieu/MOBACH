@@ -6,7 +6,7 @@
     'summary': "Modification module vente",
     'author': 'ATTALA',
     'website': 'https://www.mobach.cm',
-    'depends': ['mobach_invoice_ir', 'sale_management', 'mobach_invoice'],
+    'depends': ['hr', 'mobach_invoice_ir', 'sale_management', 'mobach_invoice'],
     'data': [
         'security/ir.model.access.csv',
         'views/sale_order.xml',
