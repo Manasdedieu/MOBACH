@@ -110,9 +110,8 @@ couvrir l'en-tête ni le pied : aucun CSS ne peut déborder d'un document à l'a
 - **Piège XPath** : `hasclass('header')` ne trouve pas les classes posées en `t-attf-class`. Il faut utiliser
   `//div[contains(concat(' ', @t-attf-class, ' '), ' header ')]`, qui ne correspond pas
   aux `report_header` des pieds de page.
-- `nui` vient de `mobach_config`, qui n'est **pas** une dépendance : son installation sur une base neuve
-  échoue à cause de `mobach_invoice_ir`, qui référence `mobach_config.company_nas_et_fils`.
-  D'où la garde `t-if="'nui' in company._fields"`.
+- `nui` de la société vient de `mobach_config`, qui n'est **pas** une dépendance (module de configuration
+  des sociétés MOBACH, trop large pour un module de rapport). D'où la garde `t-if="'nui' in company._fields"`.
 
 ## Image par défaut MOBACH
 
@@ -162,9 +161,10 @@ couvrir l'en-tête ni le pied : aucun CSS ne peut déborder d'un document à l'a
 
 ## Tester
 
-**Tester sur une copie de la vraie base** : `mobach_sale`, `mobach_config` et `mobach_invoice_ir` ne
-s'installent pas sur une base neuve. `odoo-bin db -c ../odoo-mobach.conf duplicate mobach mobach_bgtest2`,
-puis **`-u`** (et non `-i`, sans effet si le module est déjà installé dans la base copiée).
+**Base vierge** : `-i mobach_config,mobach_report_background --load-language=fr_FR` (depuis le 2026-10-21,
+`mobach_config` s'installe sur une base neuve). **Copie de la vraie base** :
+`odoo-bin db -c ../odoo-mobach.conf duplicate mobach mobach_bgtest2`, puis **`-u`** (et non `-i`, sans effet si
+le module est déjà installé dans la base copiée).
 
 
 Démarrer un serveur (wkhtmltopdf doit charger le CSS via `report.url`), puis dans `odoo-bin shell` :
