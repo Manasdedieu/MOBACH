@@ -75,29 +75,43 @@ couvrir l'en-tête ni le pied : aucun CSS ne peut déborder d'un document à l'a
 - **Début du corps** (`report_document_title_mobach`, inséré en **premier élément** de
   `div.article` dans les 7 layouts quand `mobach_document_title` est défini) :
   1. titre centré dans un cadre gris clair arrondi, texte noir : `'BON DE COMMANDE'` (devis,
-     rien pour le pro-forma), `'FACTURE'`, ou `'AVOIR'` pour `out_refund` / `in_refund` ;
-  2. `report_document_info_mobach` : « **OBJET :** » souligné + champ `object` (défini par `mobach_sale`),
-     puis deux cadres à bord carré (48,5 % / 48,5 %, espacement de 3 %) :
-     - gauche : client (`partner_id`, widget contact nom / adresse / téléphone / e-mail, + TVA) ;
-     - droite, devis : Réf. PROFORMA = `client_order_ref`, N° commande = `name`,
-       Date d'émission = `date_order` ;
-     - droite, facture : Réf. PROFORMA = `ref` (reçoit le `client_order_ref` du devis),
-       N° facture = `name`, N° commande = `invoice_origin`, Date d'émission = `invoice_date` ;
-     - devis et facture : Lieu de livraison = `partner_shipping_id.city`, Adresse de livraison =
-       `partner_shipping_id` (widget contact, adresse seule).
+     rien pour le pro-forma), `'FACTURE'`, ou `'AVOIR'` pour `out_refund` / `in_refund`, **suivi du
+     numéro** (`mobach_doc.name`, omis tant qu'il vaut `/` ou est vide) ;
+  2. `report_document_info_mobach` : deux cadres à bord carré (48,5 % / 48,5 %, espacement de 3 %),
+     puis « **OBJET :** » souligné + champ `object` (défini par `mobach_sale`) :
+     - gauche, client (`client` = `partner_id.commercial_partner_id`) : Doit = nom, NUI = `nui` sinon `vat`,
+       RCCM = `rccm` sinon `company_registry` (`nui` / `rccm` sont définis par `mobach_sale`),
+       Tél / Email = ceux de `partner_id`, sinon du client ;
+     - droite : Date d'émission en premier (`date_order` pour le devis, `invoice_date` pour la facture),
+       Réf. PROFORMA (`client_order_ref` / `ref`), puis, **devis uniquement**, Lieu de livraison =
+       `partner_shipping_id.city` et Adresse de livraison = `partner_shipping_id` (widget contact, adresse seule).
+       Le numéro du document n'y figure plus (il est dans le titre), ni le N° commande (`invoice_origin`) sur la facture.
   - `mobach_doc` (`doc` pour le devis, `o` pour la facture) est posé dans les documents, à côté de `mobach_header`.
 - **Masqué entre l'en-tête et le tableau** en mode MOBACH : `web.address_layout` (`t-if`
   étendu avec `not mobach_header`), le titre natif (`layout_document_title` vidé), `h2#informations`
   et la ligne « Objet » ajoutés par `mobach_sale`. Le `div#informations` natif est déjà supprimé
   par `mobach_sale`. D'où la **dépendance à `mobach_sale`** : nos héritages s'appliquent après les siens.
+- **Pied de page MOBACH** (`report_footer_mobach`) : même aiguillage que l'en-tête sur le `div.footer`
+  des 7 layouts ; seule la pagination « Page x / y » reste (pas de `report_footer` société ni de SVG wave/bubble).
+- **Tableau des lignes** : colonne « N° » en première position, numérotée 1, 2, … sur les lignes de produit
+  seulement (sections, sous-sections et notes reçoivent une cellule vide ; compteur `mobach_line_number`).
+  Facture : les lignes regroupées (sections masquées) sont numérotées si produit ou `hide_details`.
+- **Conditions de paiement retirées** : note du `payment_term_id` sur le devis ; note et échéancier
+  (`payment_terms_note_id` et son parent) sur la facture. La « Payment Communication » reste.
+- **Montant en lettres** (`report_amount_in_words_mobach`) : sous les totaux (après `so_total_summary` pour le
+  devis, avant `div#payment_term` pour la facture, avec `clear: both` car les totaux sont en `float-end`),
+  « Arrêté(e) le présent bon de commande / la présente facture / le présent avoir à la somme de : … ».
+  `currency_id.amount_to_text(amount_total)` forcé en `fr_FR` (le reste du document est en français en dur).
+  « Francs CFA » : libellé d'unité de `base.XAF` fixé par `mobach_sale/data/res_currency_data.xml` (en_US et fr_FR).
+  Le « Total amount in words » natif de la facture est masqué pour ne pas faire doublon.
+- Le libellé « Retenue de garantie » des totaux vient de `mobach_sale` (devis) et `mobach_invoice_ir` (facture).
 - **Espace en-tête / titre** : `margin_top` et `header_spacing` du format A4 MOBACH = 40 mm
   (au lieu de 52). Si l'en-tête grandit (adresse société plus longue), remonter ces valeurs.
 - **Piège XPath** : `hasclass('header')` ne trouve pas les classes posées en `t-attf-class`. Il faut utiliser
   `//div[contains(concat(' ', @t-attf-class, ' '), ' header ')]`, qui ne correspond pas
   aux `report_header` des pieds de page.
-- `nui` vient de `mobach_config`, qui n'est **pas** une dépendance : son installation sur une base neuve
-  échoue à cause de `mobach_invoice_ir`, qui référence `mobach_config.company_nas_et_fils`.
-  D'où la garde `t-if="'nui' in company._fields"`.
+- `nui` de la société vient de `mobach_config`, qui n'est **pas** une dépendance (module de configuration
+  des sociétés MOBACH, trop large pour un module de rapport). D'où la garde `t-if="'nui' in company._fields"`.
 
 ## Image par défaut MOBACH
 
@@ -147,9 +161,10 @@ couvrir l'en-tête ni le pied : aucun CSS ne peut déborder d'un document à l'a
 
 ## Tester
 
-**Tester sur une copie de la vraie base** : `mobach_sale`, `mobach_config` et `mobach_invoice_ir` ne
-s'installent pas sur une base neuve. `odoo-bin db -c ../odoo-mobach.conf duplicate mobach mobach_bgtest2`,
-puis **`-u`** (et non `-i`, sans effet si le module est déjà installé dans la base copiée).
+**Base vierge** : `-i mobach_config,mobach_report_background --load-language=fr_FR` (depuis le 2026-10-21,
+`mobach_config` s'installe sur une base neuve). **Copie de la vraie base** :
+`odoo-bin db -c ../odoo-mobach.conf duplicate mobach mobach_bgtest2`, puis **`-u`** (et non `-i`, sans effet si
+le module est déjà installé dans la base copiée).
 
 
 Démarrer un serveur (wkhtmltopdf doit charger le CSS via `report.url`), puis dans `odoo-bin shell` :

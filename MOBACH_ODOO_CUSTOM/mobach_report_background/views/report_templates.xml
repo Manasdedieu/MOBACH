@@ -42,6 +42,13 @@
         </div>
     </template>
 
+    <!-- Pied de page MOBACH : la pagination seule. -->
+    <template id="report_footer_mobach">
+        <div t-if="report_type == 'pdf'" class="text-center text-muted">
+            Page <span class="page"/> / <span class="topage"/>
+        </div>
+    </template>
+
     <!-- Début du corps des devis / factures MOBACH, inséré avant tout le reste de l'article :
          titre encadré, OBJET, puis cadres client / informations du document.
          Tout ce que les documents affichaient entre l'en-tête et le tableau est masqué
@@ -50,6 +57,7 @@
         <div class="text-center mb-3"
              style="width: 60%; margin-left: auto; margin-right: auto; padding: 8px 0; background-color: #eeeeee; border: 1px solid #d6d6d6; border-radius: 12px; color: #000; font-size: 20px; font-weight: bold; letter-spacing: 1px;">
             <t t-out="mobach_document_title"/>
+            <t t-if="mobach_doc.name and mobach_doc.name != '/'" t-out="mobach_doc.name"/>
         </div>
         <t t-call="mobach_report_background.report_document_info_mobach"/>
     </template>
@@ -58,35 +66,36 @@
     <template id="report_document_info_mobach">
         <t t-set="is_invoice" t-value="mobach_doc._name == 'account.move'"/>
         <t t-set="shipping" t-value="mobach_doc.partner_shipping_id"/>
+        <!-- NUI / RCCM (mobach_sale), à défaut N° TVA / Company ID, portés par la société cliente. -->
+        <t t-set="client" t-value="mobach_doc.partner_id.commercial_partner_id"/>
         <div class="row col-sm-12 ml-auto d-flex mb-3" style="font-size: 13px;">
             <!-- Client -->
             <div style="width: 48.5%; border: 1px solid #000; padding: 8px 10px;" name="mobach_partner_block">
-                <div t-field="mobach_doc.partner_id"
-                     t-options="{&quot;widget&quot;: &quot;contact&quot;, &quot;fields&quot;: [&quot;name&quot;, &quot;address&quot;, &quot;phone&quot;, &quot;email&quot;], &quot;no_marker&quot;: true}"/>
-                <div t-if="mobach_doc.partner_id.vat">
-                    <t t-out="mobach_doc.company_id.account_fiscal_country_id.vat_label or 'N° TVA'"/> :
-                    <span t-field="mobach_doc.partner_id.vat"/>
-                </div>
+                <div><strong>Doit :</strong> <span t-out="client.name"/></div>
+                <div><strong>NUI :</strong> <span t-out="client.nui or client.vat"/></div>
+                <div><strong>RCCM :</strong> <span t-out="client.rccm or client.company_registry"/></div>
+                <div><strong>Tél :</strong> <span t-out="mobach_doc.partner_id.phone or client.phone"/></div>
+                <div><strong>Email :</strong> <span t-out="mobach_doc.partner_id.email or client.email"/></div>
             </div>
-            <!-- Informations du document -->
+            <!-- Informations du document (le numéro est dans le titre) -->
             <div style="width: 48.5%; margin-left: 3%; border: 1px solid #000; padding: 8px 10px;" name="mobach_document_block">
                 <t t-if="is_invoice">
-                    <div><strong>Réf. PROFORMA :</strong> <span t-field="mobach_doc.ref"/></div>
-                    <div><strong>N° facture :</strong> <span t-if="mobach_doc.name and mobach_doc.name != '/'" t-field="mobach_doc.name"/></div>
-                    <div><strong>N° commande :</strong> <span t-field="mobach_doc.invoice_origin"/></div>
                     <div><strong>Date d'émission :</strong> <span t-field="mobach_doc.invoice_date"/></div>
+                    <div><strong>Réf. PROFORMA :</strong> <span t-field="mobach_doc.ref"/></div>
                 </t>
                 <t t-else="">
-                    <div><strong>Réf. PROFORMA :</strong> <span t-field="mobach_doc.client_order_ref"/></div>
-                    <div><strong>N° commande :</strong> <span t-field="mobach_doc.name"/></div>
                     <div><strong>Date d'émission :</strong> <span t-field="mobach_doc.date_order" t-options="{&quot;widget&quot;: &quot;date&quot;}"/></div>
+                    <div><strong>Réf. PROFORMA :</strong> <span t-field="mobach_doc.client_order_ref"/></div>
                 </t>
-                <div><strong>Lieu de livraison :</strong> <span t-out="shipping.city"/></div>
-                <div class="d-flex">
-                    <strong class="text-nowrap me-1">Adresse de livraison :</strong>
-                    <span t-if="shipping" t-field="mobach_doc.partner_shipping_id"
-                          t-options="{&quot;widget&quot;: &quot;contact&quot;, &quot;fields&quot;: [&quot;address&quot;], &quot;no_marker&quot;: true}"/>
-                </div>
+                <!-- Livraison : devis uniquement. -->
+                <t t-if="not is_invoice">
+                    <div><strong>Lieu de livraison :</strong> <span t-out="shipping.city"/></div>
+                    <div class="d-flex">
+                        <strong class="text-nowrap me-1">Adresse de livraison :</strong>
+                        <span t-if="shipping" t-field="mobach_doc.partner_shipping_id"
+                              t-options="{&quot;widget&quot;: &quot;contact&quot;, &quot;fields&quot;: [&quot;address&quot;], &quot;no_marker&quot;: true}"/>
+                    </div>
+                </t>
             </div>
         </div>
         <div class="mb-2">
@@ -95,7 +104,18 @@
         </div>
     </template>
 
-    <!-- Aiguillage dans chaque external layout : en-tête natif ou en-tête MOBACH,
+    <!-- Montant total en lettres, affiché sous les totaux (mobach_doc : sale.order ou account.move). -->
+    <template id="report_amount_in_words_mobach">
+        <div class="mt-3 mb-3" style="clear: both;" name="mobach_amount_in_words">
+            <t t-if="mobach_doc._name == 'sale.order'">Arrêté le présent bon de commande à la somme de :</t>
+            <t t-elif="mobach_doc.move_type in ('out_refund', 'in_refund')">Arrêté le présent avoir à la somme de :</t>
+            <t t-else="">Arrêtée la présente facture à la somme de :</t>
+            <!-- En français comme le reste du document, quelle que soit la langue du client. -->
+            <strong t-out="mobach_doc.currency_id.with_context(lang='fr_FR').amount_to_text(mobach_doc.amount_total)"/>
+        </div>
+    </template>
+
+    <!-- Aiguillage dans chaque external layout : en-tête / pied natifs ou MOBACH,
          et titre encadré en tête du corps. -->
     <template id="external_layout_standard_mobach_header" inherit_id="web.external_layout_standard">
         <xpath expr="//div[contains(concat(' ', @t-attf-class, ' '), ' header ')]" position="attributes">
@@ -104,6 +124,14 @@
         <xpath expr="//div[contains(concat(' ', @t-attf-class, ' '), ' header ')]" position="after">
             <div t-else="" t-attf-class="header o_company_#{company.id}_layout">
                 <t t-call="mobach_report_background.report_header_mobach"/>
+            </div>
+        </xpath>
+        <xpath expr="//div[contains(concat(' ', @t-attf-class, ' '), ' footer ')]" position="attributes">
+            <attribute name="t-if">not mobach_header</attribute>
+        </xpath>
+        <xpath expr="//div[contains(concat(' ', @t-attf-class, ' '), ' footer ')]" position="after">
+            <div t-else="" t-attf-class="footer o_company_#{company.id}_layout">
+                <t t-call="mobach_report_background.report_footer_mobach"/>
             </div>
         </xpath>
         <xpath expr="//div[contains(concat(' ', @t-attf-class, ' '), ' article ')]/*[1]" position="before">
@@ -119,6 +147,14 @@
                 <t t-call="mobach_report_background.report_header_mobach"/>
             </div>
         </xpath>
+        <xpath expr="//div[contains(concat(' ', @t-attf-class, ' '), ' footer ')]" position="attributes">
+            <attribute name="t-if">not mobach_header</attribute>
+        </xpath>
+        <xpath expr="//div[contains(concat(' ', @t-attf-class, ' '), ' footer ')]" position="after">
+            <div t-else="" t-attf-class="footer o_company_#{company.id}_layout">
+                <t t-call="mobach_report_background.report_footer_mobach"/>
+            </div>
+        </xpath>
         <xpath expr="//div[contains(concat(' ', @t-attf-class, ' '), ' article ')]/*[1]" position="before">
             <t t-if="mobach_document_title" t-call="mobach_report_background.report_document_title_mobach"/>
         </xpath>
@@ -130,6 +166,14 @@
         <xpath expr="//div[contains(concat(' ', @t-attf-class, ' '), ' header ')]" position="after">
             <div t-else="" t-attf-class="header o_company_#{company.id}_layout">
                 <t t-call="mobach_report_background.report_header_mobach"/>
+            </div>
+        </xpath>
+        <xpath expr="//div[contains(concat(' ', @t-attf-class, ' '), ' footer ')]" position="attributes">
+            <attribute name="t-if">not mobach_header</attribute>
+        </xpath>
+        <xpath expr="//div[contains(concat(' ', @t-attf-class, ' '), ' footer ')]" position="after">
+            <div t-else="" t-attf-class="footer o_company_#{company.id}_layout">
+                <t t-call="mobach_report_background.report_footer_mobach"/>
             </div>
         </xpath>
         <xpath expr="//div[contains(concat(' ', @t-attf-class, ' '), ' article ')]/*[1]" position="before">
@@ -145,6 +189,14 @@
                 <t t-call="mobach_report_background.report_header_mobach"/>
             </div>
         </xpath>
+        <xpath expr="//div[contains(concat(' ', @t-attf-class, ' '), ' footer ')]" position="attributes">
+            <attribute name="t-if">not mobach_header</attribute>
+        </xpath>
+        <xpath expr="//div[contains(concat(' ', @t-attf-class, ' '), ' footer ')]" position="after">
+            <div t-else="" t-attf-class="footer o_company_#{company.id}_layout">
+                <t t-call="mobach_report_background.report_footer_mobach"/>
+            </div>
+        </xpath>
         <xpath expr="//div[contains(concat(' ', @t-attf-class, ' '), ' article ')]/*[1]" position="before">
             <t t-if="mobach_document_title" t-call="mobach_report_background.report_document_title_mobach"/>
         </xpath>
@@ -156,6 +208,14 @@
         <xpath expr="//div[contains(concat(' ', @t-attf-class, ' '), ' header ')]" position="after">
             <div t-else="" t-attf-class="header o_company_#{company.id}_layout">
                 <t t-call="mobach_report_background.report_header_mobach"/>
+            </div>
+        </xpath>
+        <xpath expr="//div[contains(concat(' ', @t-attf-class, ' '), ' footer ')]" position="attributes">
+            <attribute name="t-if">not mobach_header</attribute>
+        </xpath>
+        <xpath expr="//div[contains(concat(' ', @t-attf-class, ' '), ' footer ')]" position="after">
+            <div t-else="" t-attf-class="footer o_company_#{company.id}_layout">
+                <t t-call="mobach_report_background.report_footer_mobach"/>
             </div>
         </xpath>
         <xpath expr="//div[contains(concat(' ', @t-attf-class, ' '), ' article ')]/*[1]" position="before">
@@ -171,6 +231,14 @@
                 <t t-call="mobach_report_background.report_header_mobach"/>
             </div>
         </xpath>
+        <xpath expr="//div[contains(concat(' ', @t-attf-class, ' '), ' footer ')]" position="attributes">
+            <attribute name="t-if">not mobach_header</attribute>
+        </xpath>
+        <xpath expr="//div[contains(concat(' ', @t-attf-class, ' '), ' footer ')]" position="after">
+            <div t-else="" t-attf-class="footer o_company_#{company.id}_layout">
+                <t t-call="mobach_report_background.report_footer_mobach"/>
+            </div>
+        </xpath>
         <xpath expr="//div[contains(concat(' ', @t-attf-class, ' '), ' article ')]/*[1]" position="before">
             <t t-if="mobach_document_title" t-call="mobach_report_background.report_document_title_mobach"/>
         </xpath>
@@ -182,6 +250,14 @@
         <xpath expr="//div[contains(concat(' ', @t-attf-class, ' '), ' header ')]" position="after">
             <div t-else="" t-attf-class="header o_company_#{company.id}_layout">
                 <t t-call="mobach_report_background.report_header_mobach"/>
+            </div>
+        </xpath>
+        <xpath expr="//div[contains(concat(' ', @t-attf-class, ' '), ' footer ')]" position="attributes">
+            <attribute name="t-if">not mobach_header</attribute>
+        </xpath>
+        <xpath expr="//div[contains(concat(' ', @t-attf-class, ' '), ' footer ')]" position="after">
+            <div t-else="" t-attf-class="footer o_company_#{company.id}_layout">
+                <t t-call="mobach_report_background.report_footer_mobach"/>
             </div>
         </xpath>
         <xpath expr="//div[contains(concat(' ', @t-attf-class, ' '), ' article ')]/*[1]" position="before">
@@ -216,6 +292,38 @@
         <xpath expr="//span[@t-field='doc.object']/ancestor::div[hasclass('row')][1]" position="attributes">
             <attribute name="t-if">not mobach_header</attribute>
         </xpath>
+        <!-- Numérotation des lignes de produit (colonne N°). -->
+        <xpath expr="//th[@name='th_description']" position="before">
+            <th t-if="mobach_header" name="th_mobach_line_number" class="text-start">N°</th>
+        </xpath>
+        <xpath expr="//tbody[hasclass('sale_tbody')]/t[@t-foreach='lines_to_report']" position="before">
+            <t t-set="mobach_line_number" t-value="0"/>
+        </xpath>
+        <xpath expr="//td[@name='td_product_name']" position="before">
+            <t t-if="mobach_header">
+                <t t-set="mobach_line_number" t-value="mobach_line_number + 1"/>
+                <td name="td_mobach_line_number"><t t-out="mobach_line_number"/></td>
+            </t>
+        </xpath>
+        <xpath expr="//td[@name='td_section_name']" position="before">
+            <td t-if="mobach_header"/>
+        </xpath>
+        <xpath expr="//td[@name='td_note_name']" position="before">
+            <td t-if="mobach_header"/>
+        </xpath>
+        <xpath expr="//td[@name='td_combo_name']" position="before">
+            <td t-if="mobach_header"/>
+        </xpath>
+        <xpath expr="//td[@name='td_section_group_name']" position="before">
+            <td t-if="mobach_header"/>
+        </xpath>
+        <xpath expr="//div[@name='so_total_summary']" position="after">
+            <t t-if="mobach_header" t-call="mobach_report_background.report_amount_in_words_mobach"/>
+        </xpath>
+        <!-- Conditions de paiement retirées. -->
+        <xpath expr="//span[@t-field='doc.payment_term_id.note']/.." position="attributes">
+            <attribute name="t-if">not mobach_header and not is_html_empty(doc.payment_term_id.note)</attribute>
+        </xpath>
     </template>
     <template id="report_invoice_document_mobach_header" inherit_id="account.report_invoice_document">
         <xpath expr="//t[@t-call='web.external_layout']/t[@t-set='forced_vat']" position="after">
@@ -230,6 +338,42 @@
             <attribute name="t-if">False</attribute>
         </xpath>
         <xpath expr="//span[@t-field='o.object']/ancestor::div[hasclass('row')][1]" position="attributes">
+            <attribute name="t-if">False</attribute>
+        </xpath>
+        <!-- Numérotation des lignes de produit (colonne N°). -->
+        <xpath expr="//th[@name='th_description']" position="before">
+            <th name="th_mobach_line_number" class="text-start"><span>N°</span></th>
+        </xpath>
+        <xpath expr="//tbody[hasclass('invoice_tbody')]/t[@t-foreach='lines_to_report']" position="before">
+            <t t-set="mobach_line_number" t-value="0"/>
+        </xpath>
+        <xpath expr="//td[@name='account_invoice_line_name']" position="before">
+            <t t-set="mobach_line_number" t-value="mobach_line_number + 1"/>
+            <td name="td_mobach_line_number"><t t-out="mobach_line_number"/></td>
+        </xpath>
+        <xpath expr="//td[@name='line_name_td']" position="before">
+            <td/>
+        </xpath>
+        <xpath expr="//t[@t-elif='is_note']/td" position="before">
+            <td/>
+        </xpath>
+        <xpath expr="//td[@name='account_invoice_line_name_grouped_desktop']" position="before">
+            <td name="td_mobach_line_number_grouped">
+                <t t-if="hide_details or grouped_line['display_type'] == 'product'">
+                    <t t-set="mobach_line_number" t-value="mobach_line_number + 1"/>
+                    <t t-out="mobach_line_number"/>
+                </t>
+            </td>
+        </xpath>
+        <!-- Montant en lettres : le nôtre, sous les totaux, remplace celui d'Odoo. -->
+        <xpath expr="//span[@t-field='o.amount_total_words']/ancestor::p[1]" position="attributes">
+            <attribute name="t-if">False</attribute>
+        </xpath>
+        <xpath expr="//div[@id='payment_term']" position="before">
+            <t t-call="mobach_report_background.report_amount_in_words_mobach"/>
+        </xpath>
+        <!-- Conditions de paiement (note et échéancier) retirées. -->
+        <xpath expr="//span[@id='payment_terms_note_id']/.." position="attributes">
             <attribute name="t-if">False</attribute>
         </xpath>
     </template>
