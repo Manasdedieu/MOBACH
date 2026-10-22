@@ -26,12 +26,14 @@ class AccountMoveDiscount(models.TransientModel):
         string="Type de remise"
     )
 
-    @api.constrains('discount_type', 'discount_percentage')
+    @api.constrains('discount_type', 'discount_percentage', 'discount_amount')
     def _check_discount_amount(self):
         for wizard in self:
             if wizard.discount_type in ('line_discount', 'global_discount') and wizard.discount_percentage > 1.0:
                 raise ValidationError(_("La remise ne peut pas dépasser 100%."))
             if wizard.discount_type in ('line_discount', 'global_discount') and wizard.discount_percentage < 0.0:
+                raise ValidationError(_("La remise ne peut pas être négative."))
+            if wizard.discount_type == 'amount' and wizard.discount_amount < 0.0:
                 raise ValidationError(_("La remise ne peut pas être négative."))
 
     def _prepare_discount_product_values(self):
@@ -39,6 +41,7 @@ class AccountMoveDiscount(models.TransientModel):
         values = {
             'name': _('Remise'),
             'type': 'service',
+            'invoice_policy': 'order',
             'list_price': 0.0,
             'company_id': self.company_id.id,
             'taxes_id': False,
@@ -100,56 +103,81 @@ class AccountMoveDiscount(models.TransientModel):
                 'price_unit': base_line['price_unit'],
                 'quantity': base_line['quantity'],
                 'tax_ids': [Command.set(base_line['tax_ids'].ids)],
+                'extra_tax_data': AccountTax._export_base_line_extra_tax_data(base_line),
                 'sequence': 999,
+                'is_global_discount_line': True,
             })
 
         return move_line_values_list
 
-    def _create_discount_lines(self):
+    def _clear_previous_discounts(self):
+        """Supprime toute ancienne remise (sur les lignes ou ligne de remise globale/fixe)."""
         self.ensure_one()
-        discount_product = self._get_discount_product()
-
-        if self.discount_type in ('global_discount', 'line_discount'):
-            amount_type = 'percent'
-            amount = self.discount_percentage * 100.0
-        else:
-            amount_type = 'fixed'
-            amount = self.discount_amount
-
         move = self.move_id
-        AccountTax = self.env['account.tax']
-        move_lines = move.invoice_line_ids.filtered(lambda x: x.display_type == 'product')
-        
-        # We need to compute the base lines for tax calculations similar to sale order
-        base_lines = [move._prepare_product_base_line_for_taxes_computation(line) for line in move_lines]
-        AccountTax._add_tax_details_in_base_lines(base_lines, move.company_id)
-        AccountTax._round_base_lines_tax_details(base_lines, move.company_id)
-
-        def grouping_function(base_line):
-            return {'product_id': discount_product}
-
-        global_discount_base_lines = AccountTax._prepare_global_discount_lines(
-            base_lines=base_lines,
-            company=self.company_id,
-            amount_type=amount_type,
-            amount=amount,
-            computation_key=f'global_discount,{self.id}',
-            grouping_function=grouping_function,
-        )
-        commands = [
-            Command.create(values)
-            for values in self._prepare_global_discount_move_lines(global_discount_base_lines)
+        discount_lines = move.invoice_line_ids.filtered(lambda l: l._is_global_discount_line())
+        other_discounted_lines = (move.invoice_line_ids - discount_lines).filtered(lambda l: l.discount != 0.0)
+        commands = [Command.unlink(line.id) for line in discount_lines] + [
+            Command.update(line.id, {'discount': 0.0}) for line in other_discounted_lines
         ]
         if commands:
             move.with_context(check_move_validity=False).write({'invoice_line_ids': commands})
+
+    def _create_discount_lines(self):
+        self.ensure_one()
+        discount_product = self._get_discount_product()
+        move = self.move_id
+        currency = move.currency_id or move.company_currency_id
+        move_lines = move.invoice_line_ids.filtered(
+            lambda x: x.display_type == 'product' and not x._is_global_discount_line()
+        )
+        if not move_lines:
+            return
+
+        discount_dp = self.env['decimal.precision'].precision_get('Discount')
+        if self.discount_type in ('global_discount', 'line_discount'):
+            gross_ht = sum(move_lines.mapped('price_subtotal'))
+            amount = currency.round(gross_ht * self.discount_percentage) if currency else (gross_ht * self.discount_percentage)
+            line_description = _("Remise %(percent)s%%") % {
+                'percent': float_repr(self.discount_percentage * 100.0, discount_dp),
+            }
+        else:
+            amount = currency.round(self.discount_amount) if currency else self.discount_amount
+            line_description = _("Remise")
+
+        if not amount:
+            return
+
+        values = {
+            'name': line_description,
+            'product_id': discount_product.id,
+            'price_unit': -amount,
+            'quantity': 1.0,
+            'tax_ids': [Command.clear()],
+            'sequence': 999,
+            'is_global_discount_line': True,
+        }
+        move.with_context(check_move_validity=False).write({
+            'invoice_line_ids': [Command.create(values)],
+        })
 
     def action_apply_discount(self):
         self.ensure_one()
         if self.move_id.state != 'draft':
             raise ValidationError(_("Vous ne pouvez appliquer une remise que sur une facture à l'état brouillon."))
         
+        # Écraser toute ancienne remise avant d'appliquer la nouvelle
+        self._clear_previous_discounts()
+
         if self.discount_type == 'line_discount':
-            # On applique le pourcentage dans la colonne '% Remise' de chaque ligne
-            self.move_id.invoice_line_ids.write({'discount': self.discount_percentage * 100.0})
+            product_lines = self.move_id.invoice_line_ids.filtered(
+                lambda l: l.display_type == 'product' and not l._is_global_discount_line()
+            )
+            if product_lines:
+                self.move_id.with_context(check_move_validity=False).write({
+                    'invoice_line_ids': [
+                        Command.update(line.id, {'discount': self.discount_percentage * 100.0})
+                        for line in product_lines
+                    ]
+                })
         else:
             self._create_discount_lines()
