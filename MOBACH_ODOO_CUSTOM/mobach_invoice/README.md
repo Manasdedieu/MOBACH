@@ -3,7 +3,7 @@
 Ce module centralise la logique métier de facturation du groupe **MOBACH** sous **Odoo 19** :
 1. **Gestion unifiée des remises** sur les **Devis / Commandes de vente** (`sale.order`) et les **Factures clients / Avoirs** (`account.move`).
 2. **Affichage de la remise dans le bloc des totaux** (interface Odoo et impressions PDF).
-3. **Conversion automatique des prix** lors du changement de devise sur les factures et **mise à jour automatique des taux de change (base XAF)**.
+3. **Conversion automatique des prix** lors du changement de devise sur les factures.
 
 ---
 
@@ -56,9 +56,6 @@ Lorsqu'un utilisateur change la devise (`currency_id`) sur une facture en brouil
 - La méthode `_onchange_currency_id_convert_prices` convertit automatiquement le prix unitaire (`price_unit`) de chaque ligne à l'aide du taux de change à la date de facturation.
 - Le champ technique `ui_last_currency_id` mémorise la dernière devise utilisée à l'écran pour permettre plusieurs changements successifs avant enregistrement sans perte de précision.
 
-### 2.2. Mise à jour automatique des taux de change (Cron XAF)
-Une tâche planifiée (`ir_cron_update_xaf_rates`) interroge l'API de taux de change (base `XAF`) pour mettre à jour les taux des devises actives dans `res.currency.rate` uniquement lorsque le taux du jour a évolué.
-
 ---
 
 ## 3. Structure du Module
@@ -68,13 +65,10 @@ mobach_invoice/
 ├── __init__.py
 ├── __manifest__.py
 ├── README.md
-├── data/
-│   └── cron_currency_update.xml          # Cron de mise à jour des taux de change (base XAF)
 ├── models/
 │   ├── __init__.py
 │   ├── account_move.py                   # Conversion devises, calcul remise/HT, masquage PDF & injection tax_totals (Factures)
-│   ├── sale_order.py                     # Calcul remise/HT, masquage PDF, propagation facture & injection tax_totals (Devis/Commandes)
-│   └── res_currency.py                   # Logique de synchronisation des taux de change XAF
+│   └── sale_order.py                     # Calcul remise/HT, masquage PDF, propagation facture & injection tax_totals (Devis/Commandes)
 ├── report/
 │   └── report_discount_totals.xml        # Héritage QWeb PDF (account.document_tax_totals & sale.document_tax_totals)
 ├── security/

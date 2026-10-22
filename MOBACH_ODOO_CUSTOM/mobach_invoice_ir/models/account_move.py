@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from odoo import api, fields, models
+from odoo import api, fields, models, _
+from odoo.exceptions import UserError
 
 
 class AccountMove(models.Model):
@@ -65,6 +66,13 @@ class AccountMove(models.Model):
         compute='_compute_retenue_amount',
         store=True,
     )
+
+    def write(self, vals):
+        if 'ir_tax_id' in vals:
+            for move in self:
+                if move.state != 'draft':
+                    raise UserError(_("Vous ne pouvez pas modifier la taxe IR sur une facture validée ou annulée."))
+        return super().write(vals)
 
     # ------------------------------------------------------------------
     # Calcul IR / Net à Mandater

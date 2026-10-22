@@ -6,7 +6,7 @@
     'summary': "Retenue IR (2,2% / 5,5%) sur factures - SYSCOHADA Cameroun",
     'author': 'ATTALA',
     'website': 'https://www.mobach.cm',
-    'depends': ['account'],
+    'depends': ['account', 'mobach_config'],
     'data': [
         'security/ir.model.access.csv',
         'data/account_tax_group_data.xml',

@@ -14,6 +14,7 @@
                 <label for="ir_tax_id" string="Taxe IR (Retenue)"/>
                 <field name="ir_tax_id"
                        nolabel="1"
+                       readonly="state in ('sale', 'cancel')"
                        options="{'no_create': True, 'no_open': True}"
                        placeholder="Sélectionner IR applicable (optionnel)…"/>
                 <!-- Champs invisibles pour déclencher le recalcul du widget totaux -->
