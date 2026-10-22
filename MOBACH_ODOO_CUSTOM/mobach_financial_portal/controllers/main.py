@@ -79,6 +79,8 @@ class FinancialPortalController(http.Controller):
             currency_ids.pop() if (totals_comparable and currency_ids) else request.env.company.currency_id.id
         )
 
+        is_patron = request.env.user.has_group('mobach_financial_portal.group_financial_portal_patron')
+
         values = {
             'company_kpis': company_kpis,
             'totals_comparable': totals_comparable,
@@ -94,6 +96,7 @@ class FinancialPortalController(http.Controller):
             'selected_company_id': company_kpis[0]['company_id'] if (company_id and company_kpis) else False,
             'companies': request.env.user.company_ids,
             'current_year': request.env['mobach.financial.performance']._get_period_bounds('year')[1].year,
+            'is_patron': is_patron,
         }
 
         return request.render('mobach_financial_portal.portal_financial_performance_template', values)
