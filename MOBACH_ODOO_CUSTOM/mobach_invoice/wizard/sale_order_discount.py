@@ -53,13 +53,24 @@ class SaleOrderDiscount(models.TransientModel):
         if not amount:
             return
 
+        taxes = self.env['account.tax']
+        if getattr(order, 'global_tax_id', False):
+            taxes |= order.global_tax_id
+        if order_lines:
+            lines_with_taxes = order_lines.filtered(lambda l: l.tax_ids)
+            if lines_with_taxes:
+                common_taxes = lines_with_taxes[0].tax_ids
+                for line in lines_with_taxes[1:]:
+                    common_taxes &= line.tax_ids
+                taxes |= common_taxes
+
         values = {
             'name': so_line_description,
             'product_id': discount_product.id,
             'price_unit': -amount,
             'technical_price_unit': -amount,
             'product_uom_qty': 1.0,
-            'tax_ids': [Command.clear()],
+            'tax_ids': [Command.set(taxes.ids)] if taxes else [Command.clear()],
             'sequence': 999,
             'is_global_discount_line': True,
         }
