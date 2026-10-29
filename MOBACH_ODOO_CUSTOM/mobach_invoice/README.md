@@ -32,9 +32,9 @@ Sur les devis/commandes (bouton natif étendu) ainsi que sur les factures client
    - Une ligne avec l'article **Remise** est créée au prix unitaire de `-50 000 FCFA`.
    - `Montant hors taxes` = `150 000 FCFA`, `Remise` = `50 000 FCFA`.
 
-### 1.3. Ligne d'article « Remise » invisible pour l'utilisateur et non impactée par les taxes
+### 1.3. Ligne d'article « Remise » invisible pour l'utilisateur et application des taxes sur le nouveau HT
 Lorsqu'une remise globale (%) ou une remise fixe est appliquée :
-- **Exactitude du montant (sans impact des taxes)** : la ligne de remise est créée **sans taxe** (`tax_ids` vide) avec un prix unitaire strictement égal à `-montant` (ex. `-50 000 FCFA`). La TVA reste ainsi calculée sur les lignes d'articles d'origine et le montant de la remise correspond exactement à la valeur saisie dans l'assistant.
+- **Application des taxes sur le nouveau HT** : la ligne de remise porte la taxe globale (ou les taxes communes des lignes du document). Ainsi, le montant de taxe global est calculé directement sur le nouveau montant hors taxes net (nouveau HT) et non sur le brut initial. Par exemple, pour un HT de 1 450 000 FCFA avec une remise fixe de 145 000 FCFA, la TVA de 19.25% s'applique sur 1 305 000 FCFA (donnant 251 213 FCFA), ce qui donne un résultat strictement identique à une remise de 10% sur toutes les lignes.
 - **Équilibre comptable** : la ligne existe réellement dans `order_line` / `invoice_line_ids` (identifiée par le champ booléen `is_global_discount_line = True`), ce qui garantit l'exactitude du `Montant hors taxes` (`amount_untaxed`), du calcul de l'IR et de l'équilibre des écritures comptables (`account.move.line`).
 - **Masquage visuel** :
   - **Dans le formulaire Odoo (UI)** : le renderer OWL (`SectionAndNoteListRenderer`) masque automatiquement les lignes ayant `is_global_discount_line = True` (`d-none`) et les exclut des sous-totaux de sections.
@@ -45,7 +45,7 @@ Lorsqu'une remise globale (%) ou une remise fixe est appliquée :
 Dès qu'une remise est active sur un devis ou une facture (`global_discount_amount > 0`), le bloc des totaux affiche :
 1. **Montant hors taxes** (*Untaxed Amount* traduit nativement) : affiche directement le **nouveau HT** (HT net après déduction de la remise).
 2. **Remise** : affichée juste en dessous du *Montant hors taxes* (en rouge), indiquant la valeur totale de la remise appliquée.
-3. **Taxes (TVA, IR, Net à Mandater, Retenue de garantie)** puis **Total TTC**.
+3. **Taxes (TVA, IR, Net à Mandater, Retenue de solde)** puis **Total TTC**.
 
 ---
 

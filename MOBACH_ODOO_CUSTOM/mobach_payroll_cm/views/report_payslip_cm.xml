@@ -254,7 +254,7 @@
                             <tr>
                                 <td>Heures supplémentaires 20%</td>
                                 <td class="text-right"><span t-esc="'{:,.0f}'.format(lines['HS_20'].amount).replace(',', ' ') if lines.get('HS_20') and lines.get('HS_20').total else '-'" /></td>
-                                <td class="text-center"><span t-esc="'{:,.0f}'.format(lines['HS_20'].quantity) if lines.get('HS_20') and lines.get('HS_20').total else '2077'" /></td>
+                                <td class="text-center"><span t-esc="'{:,.0f}'.format(lines['HS_20'].quantity) if lines.get('HS_20') and lines.get('HS_20').total else '-'" /></td>
                                 <td class="text-right"><span t-esc="'{:,.0f}'.format(lines['HS_20'].total).replace(',', ' ') if lines.get('HS_20') and lines.get('HS_20').total else '-'" /></td>
                                 <td class="text-bold" style="border-right: none;">CREDIT FONC</td>
                                 <td class="text-right text-bold" style="border-left: none;"><span t-esc="'{:,.0f}'.format(lines['CFC_PAT'].total).replace(',', ' ') if lines.get('CFC_PAT') and lines.get('CFC_PAT').total else '-'" /></td>
@@ -264,7 +264,7 @@
                             <tr>
                                 <td>Heures d'absence</td>
                                 <td class="text-right">-</td>
-                                <td class="text-center"><span t-esc="'{:,.0f}'.format(lines['H_ABS'].quantity) if lines.get('H_ABS') and lines.get('H_ABS').total else '1731'" /></td>
+                                <td class="text-center"><span t-esc="'{:,.0f}'.format(lines['H_ABS'].quantity) if lines.get('H_ABS') and lines.get('H_ABS').total else '-'" /></td>
                                 <td class="text-right"><span t-esc="'{:,.0f}'.format(lines['H_ABS'].total).replace(',', ' ') if lines.get('H_ABS') and lines.get('H_ABS').total else '-'" /></td>
                                 <td style="border-right: none;"></td>
                                 <td style="border-left: none;" class="text-right"></td>
@@ -378,7 +378,7 @@
                             <tr>
                                 <td>Taxe de développement local</td>
                                 <td class="text-right"><span t-esc="'{:,.0f}'.format(lines['BASIC'].total).replace(',', ' ') if lines.get('BASIC') and lines.get('BASIC').total else ('{:,.0f}'.format(o.contract_id.wage).replace(',', ' ') if o.contract_id else '-')" /></td>
-                                <td class="text-center"><span t-esc="'{:,.0f}'.format(abs(lines['TDC'].total)).replace(',', ' ') if lines.get('TDC') and lines.get('TDC').total else '2000'" /></td>
+                                <td class="text-center"><span t-esc="'{:,.0f}'.format(abs(lines['TDC'].total)).replace(',', ' ') if lines.get('TDC') and lines.get('TDC').total else '-'" /></td>
                                 <td class="text-right"><span t-esc="'{:,.0f}'.format(abs(lines['TDC'].total)).replace(',', ' ') if lines.get('TDC') and lines.get('TDC').total else '-'" /></td>
                             </tr>
                             <tr>

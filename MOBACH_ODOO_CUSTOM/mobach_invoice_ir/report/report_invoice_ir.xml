@@ -74,9 +74,9 @@
                     </td>
                 </tr>
 
-                <!-- Retenue de Garantie -->
+                <!-- Retenue de Solde -->
                 <tr>
-                    <td style="color: #856404;"><strong>Retenue de Garantie</strong></td>
+                    <td style="color: #856404;"><strong>Retenue de Solde</strong></td>
                     <td class="text-end" style="color: #856404;">
                         <strong t-out="o.retenue_amount"
                                 t-options='{"widget": "monetary", "display_currency": currency}'/>
