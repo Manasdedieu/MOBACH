@@ -1,0 +1,446 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- ============================================================ -->
+    <!--  FORMAT PAPIER OFFICIEL A4 POUR LE BULLETIN DE PAIE          -->
+    <!-- ============================================================ -->
+    <record id="paperformat_payslip_cm_a4" model="report.paperformat">
+        <field name="name">Bulletin de Paie MOBACH A4</field>
+        <field name="default" eval="False" />
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">40</field>
+        <field name="margin_bottom">20</field>
+        <field name="margin_left">7</field>
+        <field name="margin_right">7</field>
+        <field name="header_line" eval="False" />
+        <field name="header_spacing">0</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <!-- ASSIGNATION DU FORMAT PAPIER A4 AU RAPPORT BULLETIN DE PAIE -->
+    <record id="payroll.action_report_payslip" model="ir.actions.report">
+        <field name="paperformat_id" ref="paperformat_payslip_cm_a4" />
+    </record>
+
+    <!-- ============================================================ -->
+    <!--  TEMPLATE OFFICIEL MOBACH - BULLETIN DE PAIE CONFORME MATRICE -->
+    <!-- ============================================================ -->
+    <template id="report_payslip_mobach_custom" inherit_id="payroll.report_payslip" priority="50">
+        <xpath expr="//t[@t-call='web.external_layout']" position="replace">
+            <t t-call="web.basic_layout">
+                <style>
+                    @page {
+                        margin: 5mm 7mm 5mm 7mm;
+                        size: A4 portrait;
+                    }
+                    .payslip-container {
+                        font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+                        font-size: 10.5px;
+                        line-height: 1.18;
+                        color: #000;
+                        margin: 0;
+                        padding: 0;
+                        width: 100%;
+                        page-break-inside: avoid;
+                    }
+                    .table-main {
+                        width: 100%;
+                        border-collapse: collapse;
+                        border: 1.2px solid #000;
+                        margin-top: 0;
+                    }
+                    .table-main tr {
+                        page-break-inside: avoid;
+                    }
+                    .table-main td, .table-main th {
+                        border: 1px solid #000;
+                        padding: 3.2px 4px;
+                        vertical-align: middle;
+                    }
+                    .header-title-box {
+                        background-color: #d9d9d9;
+                        border: 1.2px solid #000;
+                        text-align: center;
+                        font-weight: bold;
+                        font-size: 15px;
+                        padding: 4px;
+                        margin: 60px auto 80px auto;
+                        width: 44%;
+                        letter-spacing: 1.5px;
+                    }
+                    .bg-blue-hdr {
+                        background-color: #b8cce4;
+                        font-weight: bold;
+                        text-align: center;
+                        font-size: 10px;
+                    }
+                    .bg-grey-hdr {
+                        background-color: #e4e4e4;
+                    }
+                    .bg-grey-pat {
+                        background-color: #bfbfbf;
+                    }
+                    .bg-yellow-net {
+                        background-color: #fff2cc;
+                        font-weight: bold;
+                        font-size: 12px;
+                    }
+                    .text-right {
+                        text-align: right;
+                    }
+                    .text-center {
+                        text-align: center;
+                    }
+                    .text-bold {
+                        font-weight: bold;
+                    }
+                    .sig-table {
+                        width: 100%;
+                        margin-top: 60px;
+                        border-collapse: collapse;
+                        page-break-inside: avoid;
+                    }
+                    .sig-table td {
+                        padding: 3px 25px 30px 25px;
+                        font-weight: bold;
+                        font-size: 10.5px;
+                    }
+                </style>
+
+                <div class="page payslip-container">
+                    <t t-set="lines" t-value="{line.code: line for line in o.line_ids}" />
+                    <t t-set="gross_val" t-value="lines.get('GROSS').total if lines.get('GROSS') else (o.line_ids.filtered(lambda l: l.code == 'GROSS').total or 0.0)" />
+                    <t t-set="gross_tax_val" t-value="lines.get('GROSS_TAX').total if lines.get('GROSS_TAX') else 0.0" />
+                    <t t-set="gross_cotis_val" t-value="lines.get('GROSS_COTIS').total if lines.get('GROSS_COTIS') else 0.0" />
+                    <t t-set="tot_ded_val" t-value="lines.get('TOTAL_DED').total if lines.get('TOTAL_DED') else abs(sum(l.total for l in o.line_ids.filtered(lambda l: l.category_id.code == 'DED')))" />
+                    <t t-set="net_val" t-value="lines.get('NET').total if lines.get('NET') else (gross_val - tot_ded_val)" />
+                    <t t-set="tot_pat_val" t-value="lines.get('TOTAL_PAT').total if lines.get('TOTAL_PAT') else sum(l.total for l in o.line_ids.filtered(lambda l: l.category_id.code == 'COMP'))" />
+
+                    <!-- ============================================== -->
+                    <!-- EN-TÊTE DU BULLETIN                            -->
+                    <!-- ============================================== -->
+                    <div class="header-title-box">
+                        BULLETIN DE PAIE
+                    </div>
+
+                    <table style="width: 100%; border: 1.2px solid #000; border-collapse: collapse; margin-bottom: 40px;">
+                        <tr>
+                            <td style="width: 35%; border: 1px solid #000; padding: 3px 5px; vertical-align: top;">
+                                <table style="width: 100%; border: none; font-size: 10px; line-height: 1.35;">
+                                    <tr>
+                                        <td style="border: none; width: 35%; font-weight: normal; padding: 1.5px 1px;">Nom(s) :</td>
+                                        <td style="border: none; font-weight: bold; padding: 1.5px 1px;"><span t-esc="o.employee_id.name.split(' ')[-1] if ' ' in o.employee_id.name else o.employee_id.name" /></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="border: none; width: 35%; font-weight: normal; padding: 1.5px 1px;">Prénom(s) :</td>
+                                        <td style="border: none; font-weight: bold; padding: 1.5px 1px;"><span t-esc="o.employee_id.name.split(' ')[0] if ' ' in o.employee_id.name else ''" /></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="border: none; width: 35%; font-weight: normal; padding: 1.5px 1px;">N° CNPS :</td>
+                                        <td style="border: none; font-weight: bold; padding: 1.5px 1px;"><span t-esc="o.employee_id.identification_id or o.employee_id.ssnid or '-'" /></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="border: none; width: 35%; font-weight: normal; padding: 1.5px 1px;">POSTE :</td>
+                                        <td style="border: none; font-weight: bold; padding: 1.5px 1px;"><span t-esc="o.employee_id.job_title or (o.employee_id.job_id.name if o.employee_id.job_id else '-')" /></td>
+                                    </tr>
+                                </table>
+                            </td>
+                            <td style="width: 30%; border: 1px solid #000; padding: 3px; text-align: center; vertical-align: middle;">
+                                <t t-if="o.company_id.logo">
+                                    <img t-att-src="image_data_uri(o.company_id.logo)" style="max-height: 55px; max-width: 155px;" alt="MOBACH" />
+                                </t>
+                                <t t-else="">
+                                    <h3 style="margin: 0; font-weight: bold; letter-spacing: 2px; font-size: 16px;">MOBACH</h3>
+                                </t>
+                            </td>
+                            <td style="width: 35%; border: 1px solid #000; padding: 3px 5px; vertical-align: top;">
+                                <table style="width: 100%; border: none; font-size: 10px; line-height: 1.35;">
+                                    <tr>
+                                        <td style="border: none; width: 40%; font-weight: normal; padding: 1.5px 1px;">Mois de Paie :</td>
+                                        <td style="border: none; font-weight: bold; padding: 1.5px 1px;">
+                                            <span t-esc="o.date_to.strftime('%B-%Y')" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="border: none; width: 40%; font-weight: normal; padding: 1.5px 1px;">Nbre de jours :</td>
+                                        <td style="border: none; font-weight: bold; padding: 1.5px 1px;">
+                                            <span t-esc="sum(w.number_of_days for w in o.worked_days_line_ids) or 30" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="border: none; width: 40%; font-weight: normal; padding: 1.5px 1px;">Compte n° :</td>
+                                        <td style="border: none; font-weight: bold; padding: 1.5px 1px;">
+                                            <span t-esc="o.employee_id.primary_bank_account_id.acc_number if o.employee_id.primary_bank_account_id else '-'" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="border: none; width: 40%; font-weight: normal; padding: 1.5px 1px;">Banque :</td>
+                                        <td style="border: none; font-weight: bold; padding: 1.5px 1px;">
+                                            <span t-esc="o.employee_id.primary_bank_account_id.bank_id.name if o.employee_id.primary_bank_account_id and o.employee_id.primary_bank_account_id.bank_id else 'VIREMENT BGFI'" />
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!-- ============================================== -->
+                    <!-- TABLEAU PRINCIPAL DES ELEMENTS ET CHARGES      -->
+                    <!-- ============================================== -->
+                    <table class="table-main">
+                        <thead>
+                            <tr class="bg-blue-hdr">
+                                <th style="width: 31%;">ELEMENTS DE SALAIRE</th>
+                                <th style="width: 13%;">BASE</th>
+                                <th style="width: 9%;">TAUX</th>
+                                <th style="width: 15%;">MONTANTS</th>
+                                <th colspan="2" style="width: 32%;">CHARGES PATRONALES</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- LIGNE 1 : Salaire de base -->
+                            <tr>
+                                <td>Salaire de base</td>
+                                <td class="text-right"><span t-esc="'{:,.0f}'.format(lines['BASIC'].total).replace(',', ' ') if lines.get('BASIC') and lines.get('BASIC').total else ('{:,.0f}'.format(o.contract_id.wage).replace(',', ' ') if o.contract_id else '-')" /></td>
+                                <td class="text-center">-</td>
+                                <td class="text-right text-bold"><span t-esc="'{:,.0f}'.format(lines['BASIC'].total).replace(',', ' ') if lines.get('BASIC') and lines.get('BASIC').total else '-'" /></td>
+                                <td style="width: 18%; border-right: none;"></td>
+                                <td style="width: 14%; border-left: none;" class="text-right"></td>
+                            </tr>
+
+                            <!-- LIGNE 2 : Prime d'accueil et d'entretien -->
+                            <tr>
+                                <td>Prime d'accueil et d'entretien</td>
+                                <td class="text-right"><span t-esc="'{:,.0f}'.format(lines['PRIME_ACC_ENT'].amount).replace(',', ' ') if lines.get('PRIME_ACC_ENT') and lines.get('PRIME_ACC_ENT').total else '-'" /></td>
+                                <td class="text-center">-</td>
+                                <td class="text-right"><span t-esc="'{:,.0f}'.format(lines['PRIME_ACC_ENT'].total).replace(',', ' ') if lines.get('PRIME_ACC_ENT') and lines.get('PRIME_ACC_ENT').total else '-'" /></td>
+                                <td class="text-bold" style="border-right: none;">ALLOC FAM</td>
+                                <td class="text-right text-bold" style="border-left: none;"><span t-esc="'{:,.0f}'.format(lines['CNPS_PF_PAT'].total).replace(',', ' ') if lines.get('CNPS_PF_PAT') and lines.get('CNPS_PF_PAT').total else '-'" /></td>
+                            </tr>
+
+                            <!-- LIGNE 3 : Prime d'ancienneté -->
+                            <tr>
+                                <td>Prime d'ancienneté</td>
+                                <td class="text-right"><span t-esc="'{:,.0f}'.format(lines['ANC'].amount or o.contract_id.wage).replace(',', ' ') if lines.get('ANC') and lines.get('ANC').total else ('{:,.0f}'.format(o.contract_id.wage).replace(',', ' ') if o.contract_id else '-')" /></td>
+                                <td class="text-center"><span t-esc="'0%' if not (lines.get('ANC') and lines.get('ANC').total) else '{:.0%}'.format(lines['ANC'].rate / 100)" /></td>
+                                <td class="text-right"><span t-esc="'{:,.0f}'.format(lines['ANC'].total).replace(',', ' ') if lines.get('ANC') and lines.get('ANC').total else '-'" /></td>
+                                <td class="text-bold" style="border-right: none;">PENS VIEIL</td>
+                                <td class="text-right text-bold" style="border-left: none;"><span t-esc="'{:,.0f}'.format(lines['CNPS_PVI_PAT'].total).replace(',', ' ') if lines.get('CNPS_PVI_PAT') and lines.get('CNPS_PVI_PAT').total else '-'" /></td>
+                            </tr>
+
+                            <!-- LIGNE 4 : Indemnité de congé -->
+                            <tr>
+                                <td>Indemnité de congé</td>
+                                <td class="text-right"><span t-esc="'{:,.0f}'.format(lines['IND_CONGE'].amount).replace(',', ' ') if lines.get('IND_CONGE') and lines.get('IND_CONGE').total else '-'" /></td>
+                                <td class="text-center">-</td>
+                                <td class="text-right"><span t-esc="'{:,.0f}'.format(lines['IND_CONGE'].total).replace(',', ' ') if lines.get('IND_CONGE') and lines.get('IND_CONGE').total else '-'" /></td>
+                                <td style="border-right: none;"></td>
+                                <td style="border-left: none;" class="text-right"></td>
+                            </tr>
+
+                            <!-- LIGNE 5 : Prime de responsabilité -->
+                            <tr>
+                                <td>Prime de responsabilité</td>
+                                <td class="text-right"><span t-esc="'{:,.0f}'.format(lines['PRIME_RESP'].total).replace(',', ' ') if lines.get('PRIME_RESP') and lines.get('PRIME_RESP').total else '-'" /></td>
+                                <td class="text-center">-</td>
+                                <td class="text-right"><span t-esc="'{:,.0f}'.format(lines['PRIME_RESP'].total).replace(',', ' ') if lines.get('PRIME_RESP') and lines.get('PRIME_RESP').total else '-'" /></td>
+                                <td class="text-bold" style="border-right: none;">ACC TRAV</td>
+                                <td class="text-right text-bold" style="border-left: none;"><span t-esc="'{:,.0f}'.format(lines['CNPS_AT_PAT'].total).replace(',', ' ') if lines.get('CNPS_AT_PAT') and lines.get('CNPS_AT_PAT').total else '-'" /></td>
+                            </tr>
+
+                            <!-- LIGNE 6 : Heures supplémentaires 20% -->
+                            <tr>
+                                <td>Heures supplémentaires 20%</td>
+                                <td class="text-right"><span t-esc="'{:,.0f}'.format(lines['HS_20'].amount).replace(',', ' ') if lines.get('HS_20') and lines.get('HS_20').total else '-'" /></td>
+                                <td class="text-center"><span t-esc="'{:,.0f}'.format(lines['HS_20'].quantity) if lines.get('HS_20') and lines.get('HS_20').total else '2077'" /></td>
+                                <td class="text-right"><span t-esc="'{:,.0f}'.format(lines['HS_20'].total).replace(',', ' ') if lines.get('HS_20') and lines.get('HS_20').total else '-'" /></td>
+                                <td class="text-bold" style="border-right: none;">CREDIT FONC</td>
+                                <td class="text-right text-bold" style="border-left: none;"><span t-esc="'{:,.0f}'.format(lines['CFC_PAT'].total).replace(',', ' ') if lines.get('CFC_PAT') and lines.get('CFC_PAT').total else '-'" /></td>
+                            </tr>
+
+                            <!-- LIGNE 7 : Heures d'absence -->
+                            <tr>
+                                <td>Heures d'absence</td>
+                                <td class="text-right">-</td>
+                                <td class="text-center"><span t-esc="'{:,.0f}'.format(lines['H_ABS'].quantity) if lines.get('H_ABS') and lines.get('H_ABS').total else '1731'" /></td>
+                                <td class="text-right"><span t-esc="'{:,.0f}'.format(lines['H_ABS'].total).replace(',', ' ') if lines.get('H_ABS') and lines.get('H_ABS').total else '-'" /></td>
+                                <td style="border-right: none;"></td>
+                                <td style="border-left: none;" class="text-right"></td>
+                            </tr>
+
+                            <!-- LIGNE 8 : Indemnité de représentation -->
+                            <tr>
+                                <td>Indemnité de représentation</td>
+                                <td class="text-right"><span t-esc="'{:,.0f}'.format(lines['IND_REP'].total).replace(',', ' ') if lines.get('IND_REP') and lines.get('IND_REP').total else '-'" /></td>
+                                <td class="text-center">-</td>
+                                <td class="text-right"><span t-esc="'{:,.0f}'.format(lines['IND_REP'].total).replace(',', ' ') if lines.get('IND_REP') and lines.get('IND_REP').total else '-'" /></td>
+                                <td class="text-bold" style="border-right: none;">F.N.E</td>
+                                <td class="text-right text-bold" style="border-left: none;"><span t-esc="'{:,.0f}'.format(lines['FNE_PAT'].total).replace(',', ' ') if lines.get('FNE_PAT') and lines.get('FNE_PAT').total else '-'" /></td>
+                            </tr>
+
+                            <!-- LIGNE 9 : Indemnité de transport -->
+                            <tr>
+                                <td>Indemnité de transport</td>
+                                <td class="text-right"><span t-esc="'{:,.0f}'.format(lines['IND_TRANS'].total).replace(',', ' ') if lines.get('IND_TRANS') and lines.get('IND_TRANS').total else '-'" /></td>
+                                <td class="text-center">-</td>
+                                <td class="text-right"><span t-esc="'{:,.0f}'.format(lines['IND_TRANS'].total).replace(',', ' ') if lines.get('IND_TRANS') and lines.get('IND_TRANS').total else '-'" /></td>
+                                <td style="border-right: none;"></td>
+                                <td style="border-left: none;" class="text-right"></td>
+                            </tr>
+
+                            <!-- LIGNE 10 : Indemnité de logement -->
+                            <tr>
+                                <td>Indemnité de logement</td>
+                                <td class="text-right"><span t-esc="'{:,.0f}'.format(lines['IND_LOG'].total).replace(',', ' ') if lines.get('IND_LOG') and lines.get('IND_LOG').total else '-'" /></td>
+                                <td class="text-center">-</td>
+                                <td class="text-right"><span t-esc="'{:,.0f}'.format(lines['IND_LOG'].total).replace(',', ' ') if lines.get('IND_LOG') and lines.get('IND_LOG').total else '-'" /></td>
+                                <td class="text-bold" style="border-right: none;">TOTAL</td>
+                                <td class="text-right text-bold" style="border-left: none;"><span t-esc="'{:,.0f}'.format(tot_pat_val).replace(',', ' ') if tot_pat_val else '-'" /></td>
+                            </tr>
+
+                            <!-- LIGNE 11 : Indemnité d'eau -->
+                            <tr>
+                                <td>Indemnité d' eau</td>
+                                <td class="text-right">-</td>
+                                <td class="text-center">-</td>
+                                <td class="text-right"><span t-esc="'{:,.0f}'.format(lines['IND_EAU'].total).replace(',', ' ') if lines.get('IND_EAU') and lines.get('IND_EAU').total else '-'" /></td>
+                                <td colspan="2" rowspan="18" class="bg-grey-pat" style="vertical-align: top;"></td>
+                            </tr>
+
+                            <!-- LIGNE 12 : Indemnité d'électricité -->
+                            <tr>
+                                <td>Indemnité d'électricité</td>
+                                <td class="text-right">-</td>
+                                <td class="text-center">-</td>
+                                <td class="text-right"><span t-esc="'{:,.0f}'.format(lines['IND_ELEC'].total).replace(',', ' ') if lines.get('IND_ELEC') and lines.get('IND_ELEC').total else '-'" /></td>
+                            </tr>
+
+                            <!-- LIGNE 13 : Indemnité de salissure -->
+                            <tr>
+                                <td>Indemnité de salissure</td>
+                                <td class="text-right">-</td>
+                                <td class="text-center">-</td>
+                                <td class="text-right"><span t-esc="'{:,.0f}'.format(lines['IND_SALIS'].total).replace(',', ' ') if lines.get('IND_SALIS') and lines.get('IND_SALIS').total else '-'" /></td>
+                            </tr>
+
+                            <!-- LIGNE 14 : Indemnité de panier -->
+                            <tr>
+                                <td>Indemnité de panier</td>
+                                <td class="text-right">-</td>
+                                <td class="text-center">-</td>
+                                <td class="text-right"><span t-esc="'{:,.0f}'.format(lines['IND_PANIER'].total).replace(',', ' ') if lines.get('IND_PANIER') and lines.get('IND_PANIER').total else '-'" /></td>
+                            </tr>
+
+                            <!-- LIGNE 15 : Indemnité de lait -->
+                            <tr>
+                                <td>Indemnité de lait</td>
+                                <td class="text-right">-</td>
+                                <td class="text-center">-</td>
+                                <td class="text-right"><span t-esc="'{:,.0f}'.format(lines['IND_LAIT'].total).replace(',', ' ') if lines.get('IND_LAIT') and lines.get('IND_LAIT').total else '-'" /></td>
+                            </tr>
+
+                            <!-- ============================================== -->
+                            <!-- SOUS-TOTAUX BRUTS                              -->
+                            <!-- ============================================== -->
+                            <tr style="background-color: #f2f2f2; font-weight: bold;">
+                                <td colspan="3" class="text-bold" style="padding-left: 15px;">SALAIRE BRUT</td>
+                                <td class="text-right text-bold"><span t-esc="'{:,.0f}'.format(gross_val).replace(',', ' ') if gross_val else '0'" /></td>
+                            </tr>
+                            <tr style="background-color: #f2f2f2; font-weight: bold;">
+                                <td colspan="3" class="text-bold" style="padding-left: 15px;">SALAIRE BRUT TAXABLE</td>
+                                <td class="text-right text-bold"><span t-esc="'{:,.0f}'.format(gross_tax_val or gross_val).replace(',', ' ') if gross_val else '0'" /></td>
+                            </tr>
+                            <tr style="background-color: #f2f2f2; font-weight: bold;">
+                                <td colspan="3" class="text-bold" style="padding-left: 15px;">SALAIRE COTISABLE</td>
+                                <td class="text-right text-bold"><span t-esc="'{:,.0f}'.format(gross_cotis_val or gross_val).replace(',', ' ') if gross_val else '0'" /></td>
+                            </tr>
+
+                            <!-- ============================================== -->
+                            <!-- RETENUES SUR SALAIRE                           -->
+                            <!-- ============================================== -->
+                            <tr style="background-color: #e9edf4;">
+                                <td colspan="4" class="text-bold" style="padding-left: 8px;">RETENUES SUR SALAIRE</td>
+                            </tr>
+                            <tr>
+                                <td>IRPP</td>
+                                <td class="text-right"><span t-esc="'{:,.0f}'.format(gross_tax_val or gross_val).replace(',', ' ') if gross_val else '-'" /></td>
+                                <td class="text-center">Barème</td>
+                                <td class="text-right"><span t-esc="'{:,.0f}'.format(abs(lines['IRPP'].total)).replace(',', ' ') if lines.get('IRPP') and lines.get('IRPP').total else '-'" /></td>
+                            </tr>
+                            <tr>
+                                <td>Centimes additionnels</td>
+                                <td class="text-right"><span t-esc="'{:,.0f}'.format(abs(lines['IRPP'].total)).replace(',', ' ') if lines.get('IRPP') and lines.get('IRPP').total else '-'" /></td>
+                                <td class="text-center">10 %</td>
+                                <td class="text-right"><span t-esc="'{:,.0f}'.format(abs(lines['CAC'].total)).replace(',', ' ') if lines.get('CAC') and lines.get('CAC').total else '-'" /></td>
+                            </tr>
+                            <tr>
+                                <td>Taxe de développement local</td>
+                                <td class="text-right"><span t-esc="'{:,.0f}'.format(lines['BASIC'].total).replace(',', ' ') if lines.get('BASIC') and lines.get('BASIC').total else ('{:,.0f}'.format(o.contract_id.wage).replace(',', ' ') if o.contract_id else '-')" /></td>
+                                <td class="text-center"><span t-esc="'{:,.0f}'.format(abs(lines['TDC'].total)).replace(',', ' ') if lines.get('TDC') and lines.get('TDC').total else '2000'" /></td>
+                                <td class="text-right"><span t-esc="'{:,.0f}'.format(abs(lines['TDC'].total)).replace(',', ' ') if lines.get('TDC') and lines.get('TDC').total else '-'" /></td>
+                            </tr>
+                            <tr>
+                                <td>Pension vieillesse</td>
+                                <td class="text-right"><span t-esc="'{:,.0f}'.format(gross_cotis_val or gross_val).replace(',', ' ') if gross_val else '-'" /></td>
+                                <td class="text-center">4,20 %</td>
+                                <td class="text-right"><span t-esc="'{:,.0f}'.format(abs(lines['CNPS_PVI_SAL'].total)).replace(',', ' ') if lines.get('CNPS_PVI_SAL') and lines.get('CNPS_PVI_SAL').total else '-'" /></td>
+                            </tr>
+                            <tr>
+                                <td>Crédit foncier</td>
+                                <td class="text-right"><span t-esc="'{:,.0f}'.format(gross_tax_val or gross_val).replace(',', ' ') if gross_val else '-'" /></td>
+                                <td class="text-center">1 %</td>
+                                <td class="text-right"><span t-esc="'{:,.0f}'.format(abs(lines['CFC_SAL'].total)).replace(',', ' ') if lines.get('CFC_SAL') and lines.get('CFC_SAL').total else '-'" /></td>
+                            </tr>
+                            <tr>
+                                <td>redevance audio visuelle (CRTV)</td>
+                                <td class="text-right"><span t-esc="'{:,.0f}'.format(gross_val).replace(',', ' ') if gross_val else '-'" /></td>
+                                <td class="text-center">Barème</td>
+                                <td class="text-right"><span t-esc="'{:,.0f}'.format(abs(lines['RAV'].total)).replace(',', ' ') if lines.get('RAV') and lines.get('RAV').total else '-'" /></td>
+                            </tr>
+                            <tr>
+                                <td>Avances sur salaires</td>
+                                <td class="text-right">-</td>
+                                <td class="text-center">-</td>
+                                <td class="text-right"><span t-esc="'{:,.0f}'.format(abs(lines['AVANCE'].total)).replace(',', ' ') if lines.get('AVANCE') and lines.get('AVANCE').total else '-'" /></td>
+                            </tr>
+                            <tr>
+                                <td>Remboursement prêts - retenues</td>
+                                <td class="text-right">-</td>
+                                <td class="text-center">-</td>
+                                <td class="text-right"><span t-esc="'{:,.0f}'.format(abs(lines['PRET'].total)).replace(',', ' ') if lines.get('PRET') and lines.get('PRET').total else '-'" /></td>
+                            </tr>
+
+                            <!-- TOTAL DES RETENUES -->
+                            <tr style="font-weight: bold;">
+                                <td colspan="3" class="text-bold">TOTAL DES RETENUES</td>
+                                <td class="text-right text-bold"><span t-esc="'{:,.0f}'.format(tot_ded_val).replace(',', ' ') if tot_ded_val else '0'" /></td>
+                            </tr>
+
+                            <!-- SALAIRE NET A PAYER -->
+                            <tr class="bg-yellow-net">
+                                <td colspan="3" class="text-bold">SALAIRE NET A PAYER</td>
+                                <td class="text-right text-bold"><span t-esc="'{:,.0f}'.format(net_val).replace(',', ' ') if net_val else '0'" /></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- ============================================== -->
+                    <!-- SIGNATURES                                     -->
+                    <!-- ============================================== -->
+                    <table class="sig-table">
+                        <tr>
+                            <td style="width: 50%; text-align: left;">
+                                Signature de l'employé
+                            </td>
+                            <td style="width: 50%; text-align: right;">
+                                Signature de l'employeur
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </t>
+        </xpath>
+    </template>
+</odoo>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<odoo>
+<odoo noupdate="1">
     <!-- Catégories de Règles Salariales pour le Cameroun -->
     <record id="category_basic" model="hr.salary.rule.category">
         <field name="name">Salaire de Base</field>

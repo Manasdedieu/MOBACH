@@ -1,33 +1,48 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<odoo>
-    <!-- Structure Salariale Standard Cameroun -->
+<odoo noupdate="1">
+    <!-- Structure Salariale Standard Cameroun - Matrice Officielle MOBACH -->
     <record id="structure_cm_standard" model="hr.payroll.structure">
         <field name="name">Structure Salariale Standard - Cameroun (SYSCOHADA)</field>
         <field name="code">CM_STD</field>
         <field name="company_id" ref="base.main_company" />
-        <field name="note">Structure de paie applicable aux salariés sous législation camerounaise (CNPS, IRPP, CAC, CFC, RAV, TDC, FNE)</field>
+        <field name="note">Structure de paie officielle MOBACH conforme au modèle de bulletin et à la législation camerounaise</field>
         <field
             eval="[(6, 0, [
                 ref('rule_basic_cm'),
-                ref('rule_sursal_cm'),
+                ref('rule_prime_acc_ent_cm'),
                 ref('rule_prime_anc_cm'),
-                ref('rule_prime_div_cm'),
+                ref('rule_ind_conge_cm'),
+                ref('rule_prime_resp_cm'),
+                ref('rule_hs_20_cm'),
+                ref('rule_h_abs_cm'),
+                ref('rule_ind_rep_cm'),
                 ref('rule_ind_trans_cm'),
+                ref('rule_ind_log_cm'),
+                ref('rule_ind_eau_cm'),
+                ref('rule_ind_elec_cm'),
+                ref('rule_ind_salis_cm'),
+                ref('rule_ind_panier_cm'),
+                ref('rule_ind_lait_cm'),
                 ref('rule_gross_cm'),
-                ref('rule_cnps_sal_cm'),
-                ref('rule_cfc_sal_cm'),
-                ref('rule_rav_cm'),
-                ref('rule_tdc_cm'),
-                ref('rule_base_irpp_cm'),
-                ref('rule_irpp_cm'),
-                ref('rule_cac_cm'),
-                ref('rule_avance_cm'),
-                ref('rule_net_cm'),
-                ref('rule_cnps_pat_cm'),
+                ref('rule_gross_tax_cm'),
+                ref('rule_gross_cotis_cm'),
                 ref('rule_cnps_pf_cm'),
+                ref('rule_cnps_pat_cm'),
                 ref('rule_cnps_at_cm'),
                 ref('rule_cfc_pat_cm'),
                 ref('rule_fne_pat_cm'),
+                ref('rule_total_pat_cm'),
+                ref('rule_base_irpp_cm'),
+                ref('rule_irpp_cm'),
+                ref('rule_cac_cm'),
+                ref('rule_tdc_cm'),
+                ref('rule_cnps_sal_cm'),
+                ref('rule_cfc_sal_cm'),
+                ref('rule_rav_cm'),
+                ref('rule_avance_cm'),
+                ref('rule_pret_cm'),
+                ref('rule_total_ded_cm'),
+                ref('rule_net_cm'),
             ])]"
             name="rule_ids"
         />
