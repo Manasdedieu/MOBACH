@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from odoo import api, models, fields
+from odoo import api, models, fields, _
+from odoo.exceptions import UserError
 
 
 class SaleOrder(models.Model):
@@ -95,6 +96,13 @@ class SaleOrder(models.Model):
                 order.retenue_amount = (order.amount_total * retenue_percent) / 100.0
             else:
                 order.retenue_amount = 0.0
+
+    def write(self, vals):
+        if 'ir_tax_id' in vals:
+            for order in self:
+                if order.state in ('sale', 'cancel'):
+                    raise UserError(_("Vous ne pouvez pas modifier la taxe IR sur une commande confirmée ou annulée."))
+        return super().write(vals)
 
     def _prepare_invoice(self):
         result = super()._prepare_invoice()
