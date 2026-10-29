@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<odoo>
+<odoo noupdate="1">
     <!-- Registres de contribution / Organismes sociaux et fiscaux du Cameroun -->
     <record id="contrib_register_cnps" model="hr.contribution.register">
         <field name="name">Caisse Nationale de Prévoyance Sociale (CNPS)</field>
