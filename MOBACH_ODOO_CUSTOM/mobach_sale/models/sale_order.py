@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from odoo import api, models, fields
+from odoo import api, models, fields, _
+from odoo.exceptions import UserError
 
 
 class SaleOrder(models.Model):
@@ -38,7 +39,7 @@ class SaleOrder(models.Model):
     )
 
     retenue_amount = fields.Monetary(
-        string='Retenue de Garantie',
+        string='Retenue de Solde',
         currency_field='currency_id',
         compute='_compute_retenue_amount',
         store=True,
@@ -80,21 +81,41 @@ class SaleOrder(models.Model):
             order.ir_amount = ir_amt
             order.amount_net_mandate = order.amount_untaxed - ir_amt
 
-    @api.depends('payment_term_id', 'payment_term_id.is_retenue', 'amount_total')
+    @api.depends('payment_term_id', 'payment_term_id.is_retenue', 'amount_total', 'amount_untaxed', 'amount_tax', 'date_order')
     def _compute_retenue_amount(self):
         for order in self:
             if order.payment_term_id and order.payment_term_id.is_retenue and order.amount_total:
-                immediate_percent = 0.0
-                for line in order.payment_term_id.line_ids:
-                    if getattr(line, 'nb_days', 0) == 0:
-                        if line.value == 'percent':
-                            immediate_percent += line.value_amount
-                        elif line.value == 'fixed':
-                            immediate_percent += (line.value_amount / order.amount_total * 100)
-                retenue_percent = max(0, 100.0 - immediate_percent)
-                order.retenue_amount = (order.amount_total * retenue_percent) / 100.0
+                ref_date = (order.date_order and order.date_order.date()) or fields.Date.context_today(order)
+                currency = order.currency_id or order.company_id.currency_id
+                company = order.company_id or self.env.company
+                try:
+                    terms = order.payment_term_id._compute_terms(
+                        date_ref=ref_date,
+                        currency=currency,
+                        company=company,
+                        tax_amount=order.amount_tax,
+                        tax_amount_currency=order.amount_tax,
+                        untaxed_amount=order.amount_untaxed,
+                        untaxed_amount_currency=order.amount_untaxed,
+                        sign=1,
+                    )
+                    delayed_amount = sum(
+                        term['foreign_amount']
+                        for term in terms.get('line_ids', [])
+                        if term.get('date') and fields.Date.to_date(term.get('date')) > ref_date
+                    )
+                    order.retenue_amount = abs(delayed_amount)
+                except Exception:
+                    order.retenue_amount = 0.0
             else:
                 order.retenue_amount = 0.0
+
+    def write(self, vals):
+        if 'ir_tax_id' in vals:
+            for order in self:
+                if order.state in ('sale', 'cancel'):
+                    raise UserError(_("Vous ne pouvez pas modifier la taxe IR sur une commande confirmée ou annulée."))
+        return super().write(vals)
 
     def _prepare_invoice(self):
         result = super()._prepare_invoice()

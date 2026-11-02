@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Factures PDF : Affichage Remise sous le Montant hors taxes (nouveau HT) -->
+    <template id="document_tax_totals_mobach_discount_invoice"
+              inherit_id="account.document_tax_totals"
+              name="MOBACH — Remise sur Factures (PDF)">
+
+        <xpath expr="//tr[hasclass('o_subtotal')]" position="attributes">
+            <attribute name="t-if">subtotal['tax_groups'] or tax_totals.get('has_global_discount') or tax_totals.get('has_ir')</attribute>
+        </xpath>
+
+        <xpath expr="//tr[hasclass('o_subtotal')]" position="after">
+            <t t-if="subtotal_index == 0 and tax_totals.get('has_global_discount')">
+                <tr class="o_discount" style="color: #dc3545;">
+                    <td>
+                        <span>Remise</span>
+                    </td>
+                    <td class="text-end">
+                        <span t-out="tax_totals.get('global_discount_amount', 0.0)"
+                              t-options='{"widget": "monetary", "display_currency": currency}'/>
+                    </td>
+                </tr>
+            </t>
+        </xpath>
+    </template>
+
+    <!-- Devis / Commandes PDF : Affichage Remise sous le Montant hors taxes (nouveau HT) -->
+    <template id="document_tax_totals_mobach_discount_sale"
+              inherit_id="sale.document_tax_totals"
+              name="MOBACH — Remise sur Devis/Commandes (PDF)">
+
+        <xpath expr="//tr[hasclass('o_subtotal')]" position="attributes">
+            <attribute name="t-if">subtotal['tax_groups'] or tax_totals.get('has_global_discount') or tax_totals.get('has_ir')</attribute>
+        </xpath>
+
+        <xpath expr="//tr[hasclass('o_subtotal')]" position="after">
+            <t t-if="subtotal_index == 0 and tax_totals.get('has_global_discount')">
+                <tr class="o_discount" style="color: #dc3545;">
+                    <td>
+                        <span>Remise</span>
+                    </td>
+                    <td class="text-end">
+                        <span t-out="tax_totals.get('global_discount_amount', 0.0)"
+                              t-options='{"widget": "monetary", "display_currency": currency}'/>
+                    </td>
+                </tr>
+            </t>
+        </xpath>
+    </template>
+</odoo>

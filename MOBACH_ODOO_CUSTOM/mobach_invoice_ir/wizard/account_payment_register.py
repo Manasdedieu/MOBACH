@@ -63,9 +63,9 @@ class AccountPaymentRegister(models.TransientModel):
             formatted_delayed_amount = self.currency_id.format(delayed_amount) if self.currency_id else str(delayed_amount)
             
             raise UserError(_(
-                "Paiement bloqué : Vous tentez de payer un montant incluant la retenue de garantie.\n\n"
+                "Paiement bloqué : Vous tentez de payer un montant incluant la retenue de solde.\n\n"
                 "Règle de l'entreprise : Le paiement total n'est autorisé qu'après la date limite.\n"
-                "Le reste (retenue de garantie de %(retenue_amount)s) est bloqué jusqu'au %(date)s.\n\n"
+                "Le reste (retenue de solde de %(retenue_amount)s) est bloqué jusqu'au %(date)s.\n\n"
                 "Seul un administrateur comptabilité peut forcer ce paiement.",
                 amount=formatted_amount,
                 retenue_amount=formatted_delayed_amount,

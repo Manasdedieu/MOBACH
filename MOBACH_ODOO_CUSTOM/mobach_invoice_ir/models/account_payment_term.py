@@ -5,7 +5,7 @@ class AccountPaymentTerm(models.Model):
     _inherit = 'account.payment.term'
 
     is_retenue = fields.Boolean(
-        string="Génère une retenue de garantie",
+        string="Génère une retenue de solde",
         default=False,
-        help="Cochez cette case si cette condition de paiement doit déclencher l'affichage et le blocage d'une retenue de garantie sur les factures et commandes de vente."
+        help="Cochez cette case si cette condition de paiement doit déclencher l'affichage et le blocage d'une retenue de solde sur les factures et commandes de vente."
     )

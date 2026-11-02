@@ -1,0 +1,3 @@
+# Dépendances Python requises pour la suite Paie OCA et modules tiers (Odoo 19)
+pypdf
+openupgradelib

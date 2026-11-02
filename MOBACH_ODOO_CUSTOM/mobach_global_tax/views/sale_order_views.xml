@@ -1,25 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data>
-        <record id="view_order_form_global_tax" model="ir.ui.view">
-            <field name="name">sale.order.form.global.tax</field>
-            <field name="model">sale.order</field>
-            <field name="inherit_id" ref="sale.view_order_form"/>
-            <field name="arch" type="xml">
-                <xpath expr="//header" position="inside">
-                    <button name="%(mobach_global_tax.action_mobach_global_tax_wizard)d"
-                            string="Taxes Globales"
-                            type="action"
-                            class="btn-secondary"
-                            invisible="state not in ('draft', 'sent')"/>
-                    <button name="%(mobach_global_tax.action_mobach_global_tax_wizard)d"
-                            string="Taxes Globales (Admin)"
-                            type="action"
-                            class="btn-warning"
-                            invisible="state in ('draft', 'sent', 'cancel')"
-                            groups="account.group_account_manager"/>
-                </xpath>
-            </field>
-        </record>
-    </data>
+    <record id="view_order_form_global_tax" model="ir.ui.view">
+        <field name="name">sale.order.form.global.tax</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='partner_details']" position="inside">
+                <field name="global_tax_id"
+                       readonly="state in ('sale', 'cancel')"
+                       options="{'no_create': True, 'no_open': True}"
+                       placeholder="Sélectionner une taxe globale…"/>
+                <field name="applied_global_tax_id" invisible="1"/>
+            </xpath>
+        </field>
+    </record>
 </odoo>

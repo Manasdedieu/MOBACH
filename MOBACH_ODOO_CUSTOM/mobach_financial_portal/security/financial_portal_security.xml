@@ -12,6 +12,18 @@
         </record>
 
         <!-- ================================================================
+             GROUPE PATRON DU GROUPE MOBACH
+             Réservé au patron du groupe MOBACH pour afficher la synthèse
+             globale de l'ensemble des sociétés.
+        ================================================================ -->
+        <record id="group_financial_portal_patron" model="res.groups">
+            <field name="name">Performance Financière MOBACH : Patron du Groupe</field>
+            <field name="comment">Réservé au patron du groupe MOBACH : permet de visualiser la synthèse globale de performance financière de toutes les sociétés du Groupe MOBACH sur le portail web.</field>
+            <field name="implied_ids" eval="[(4, ref('group_financial_portal_user'))]"/>
+            <field name="user_ids" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+        </record>
+
+        <!-- ================================================================
              CLOISONNEMENT MULTI-SOCIÉTÉ
 
              Sans cette règle, tout titulaire du groupe « Facturation » lisait les

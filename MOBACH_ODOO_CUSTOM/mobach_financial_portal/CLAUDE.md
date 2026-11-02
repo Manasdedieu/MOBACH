@@ -278,6 +278,7 @@ cochées dans le sélecteur du haut de page.
 | Modèle | `ir.model.access.csv` + règle globale `[('company_id', 'in', company_ids)]` | `security/` |
 
 Le groupe `group_financial_portal_user` hérite de `account.group_account_invoice`.
+Le groupe `group_financial_portal_patron` (« Performance Financière MOBACH : Patron du Groupe ») hérite de `group_financial_portal_user` et conditionne l'affichage de la synthèse globale consolidée de toutes les sociétés sur le portail web. Les cartes individuelles de sociétés y masquent les informations d'avoirs (clients et fournisseurs).
 
 La règle `financial_performance_company_rule` est **globale** : sans elle, tout
 titulaire du groupe « Facturation » lisait les indicateurs des quatre sociétés du

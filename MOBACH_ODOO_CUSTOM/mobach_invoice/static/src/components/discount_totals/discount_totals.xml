@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+    <t t-name="mobach_invoice.TaxTotalsDiscountPatch"
+       t-inherit="account.TaxTotalsField"
+       t-inherit-mode="extension">
+
+        <xpath expr="//t[@t-foreach='totals.subtotals']/tr[1]" position="after">
+            <t t-if="subtotal_index === 0 and discountData.hasDiscount">
+                <!-- Ligne Remise sous le Montant hors taxes (qui affiche le nouveau HT) -->
+                <tr>
+                    <td class="o_td_label">
+                        <label class="o_form_label o_tax_total_label"
+                               style="color: #dc3545;">
+                            Remise
+                        </label>
+                    </td>
+                    <td class="o_list_monetary">
+                        <span dir="ltr"
+                              name="global_discount_amount"
+                              style="white-space: nowrap; color: #dc3545;"
+                              t-out="formatDiscountMonetary(discountData.discountAmount)"/>
+                    </td>
+                </tr>
+            </t>
+        </xpath>
+
+    </t>
+</templates>

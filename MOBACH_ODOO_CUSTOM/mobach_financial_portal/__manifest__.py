@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'MOBACH - Portail de Performance Financière',
-    'version': '19.0.1.1.0',
+    'version': '19.0.1.2.0',
     'category': 'Accounting/Localizations',
     'summary': 'Tableau de bord et portail de performance financière par société et domaine d\'activité (SYSCOHADA)',
     'description': """
