@@ -1,0 +1,5 @@
+"id","name","description","active","invoice_label","amount","amount_type","type_tax_use","tax_group_id","repartition_line_ids/repartition_type","repartition_line_ids/document_type","repartition_line_ids/tag_ids","repartition_line_ids/account_id","repartition_line_ids/factor_percent","description@fr","name@fr","fiscal_position_ids","original_tax_ids"
+"tva_purchase_immo_19_25","19.25% I","19.25% on fixed assets","True","","19.25","percent","purchase","tax_group_19_25","base","invoice","","","","19.25% sur les immobilisations","","fiscal_position_template_1",""
+"","","","","","","","","","tax","invoice","CM_18","pcg_4451","","","","",""
+"","","","","","","","","","base","refund","","","","","","",""
+"","","","","","","","","","tax","refund","CM_18","pcg_4451","","","","",""

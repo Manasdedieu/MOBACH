@@ -157,6 +157,12 @@ def post_init_hook(env):
     """
     _logger.info("=== MOBACH : début de la configuration post-installation ===")
 
+    # Sur une base neuve, l'installation de `account` programme le plan générique (generic_coa) pour la
+    # société principale, encore sans pays à ce moment-là. Il s'exécute en fin d'installation, donc après
+    # ce hook, et remplacerait le plan SYSCOHADA appliqué plus bas : on l'annule.
+    if hasattr(env.registry, '_auto_install_template'):
+        del env.registry._auto_install_template
+
     # 0. Langue française par défaut
     _logger.info("--- Chargement de la langue française (fr_FR) ---")
     _load_french_language(env)
@@ -300,7 +306,9 @@ def _get_default_account(env, company, jtype, code):
     Retourne le compte comptable SYSCOHADA par défaut selon le type de journal.
     Les codes sont issus du Plan Comptable OHADA.
     """
-    Account = env['account.account']
+    # Contexte de la société visée : sinon les règles multi-sociétés limitent la recherche à la société
+    # principale, rien n'est trouvé et le journal crée son propre compte (ex. 5713 « Caisse » en double).
+    Account = env['account.account'].with_company(company)
     account_code_map = {
         'sale':     ['701', '706', '707'],   # Ventes de marchandises/prestations
         'purchase': ['601', '604', '613'],   # Achats de marchandises/services
