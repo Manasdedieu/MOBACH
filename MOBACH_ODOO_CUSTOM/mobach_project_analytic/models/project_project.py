@@ -92,6 +92,10 @@ class ProjectProject(models.Model):
         string='Factures Fournisseurs',
         compute='_compute_mobach_analytic_totals',
     )
+    mobach_delivery_count = fields.Integer(
+        string='Bons de livraison',
+        compute='_compute_mobach_delivery_count',
+    )
     mobach_currency_id = fields.Many2one(
         'res.currency',
         compute='_compute_mobach_currency_id',
@@ -351,8 +355,10 @@ class ProjectProject(models.Model):
         generic_project = self._mobach_get_generic_project()
         is_generic = (self.id == generic_project.id)
 
+        # Factures validées uniquement, comme le compteur du bouton.
         domain = [
             ('move_type', 'in', ('out_invoice', 'out_refund')),
+            ('state', '=', 'posted'),
         ]
         if is_generic:
             domain += ['|', ('invoice_line_ids.analytic_project_id', '=', self.id), ('invoice_line_ids.analytic_project_id', '=', False)]
@@ -374,8 +380,10 @@ class ProjectProject(models.Model):
         generic_project = self._mobach_get_generic_project()
         is_generic = (self.id == generic_project.id)
 
+        # Factures validées uniquement, comme le compteur du bouton.
         domain = [
             ('move_type', 'in', ('in_invoice', 'in_refund')),
+            ('state', '=', 'posted'),
         ]
         if is_generic:
             domain += ['|', ('invoice_line_ids.analytic_project_id', '=', self.id), ('invoice_line_ids.analytic_project_id', '=', False)]
@@ -390,6 +398,33 @@ class ProjectProject(models.Model):
             'domain': domain,
             'context': {'default_move_type': 'in_invoice'},
         }
+
+    def _mobach_delivery_domain(self):
+        """Bons de livraison du projet : projet d'en-tête du transfert, ou
+        projet porté par la ligne de commande client d'origine (le projet est
+        affectable ligne par ligne)."""
+        self.ensure_one()
+        return [
+            ('picking_type_code', '=', 'outgoing'),
+            '|',
+            ('project_id', '=', self.id),
+            ('move_ids.sale_line_id.project_id', '=', self.id),
+        ]
+
+    def _compute_mobach_delivery_count(self):
+        Picking = self.env['stock.picking']
+        for project in self:
+            project.mobach_delivery_count = (
+                Picking.search_count(project._mobach_delivery_domain())
+                if project.id else 0
+            )
+
+    def action_mobach_view_deliveries(self):
+        """Ouvre les bons de livraison du projet."""
+        self.ensure_one()
+        action = self._get_picking_action(_('Bons de livraison — %s', self.name), 'outgoing')
+        action['domain'] = self._mobach_delivery_domain()
+        return action
 
     def action_mobach_view_margin_report(self):
         """Ouvre le tableau croisé de rentabilité, cadré sur ce projet."""

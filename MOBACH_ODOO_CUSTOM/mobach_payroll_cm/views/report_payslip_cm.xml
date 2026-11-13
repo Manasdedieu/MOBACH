@@ -160,7 +160,15 @@
                                     <tr>
                                         <td style="border: none; width: 40%; font-weight: normal; padding: 1.5px 1px;">Mois de Paie :</td>
                                         <td style="border: none; font-weight: bold; padding: 1.5px 1px;">
-                                            <span t-esc="o.date_to.strftime('%B-%Y')" />
+                                            <!-- Mois en français, quelle que soit la langue de l'utilisateur. -->
+                                            <t t-set="mois_fr" t-value="['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']" />
+                                            <span t-esc="'%s %s' % (mois_fr[o.date_to.month - 1], o.date_to.year)" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="border: none; width: 40%; font-weight: normal; padding: 1.5px 1px;">Période :</td>
+                                        <td style="border: none; font-weight: bold; padding: 1.5px 1px;">
+                                            du <span t-esc="o.date_from.strftime('%d/%m/%Y')" /> au <span t-esc="o.date_to.strftime('%d/%m/%Y')" />
                                         </td>
                                     </tr>
                                     <tr>

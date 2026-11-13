@@ -27,13 +27,25 @@
                 <button class="oe_stat_button"
                         type="object"
                         name="action_mobach_view_vendor_bills"
-                        icon="fa-book"
+                        icon="fa-file-text-o"
                         groups="account.group_account_invoice">
                     <div class="o_field_widget o_stat_info">
                         <span class="o_stat_value">
                             <field name="mobach_vendor_bill_count"/>
                         </span>
                         <span class="o_stat_text">Factures Fournisseurs</span>
+                    </div>
+                </button>
+                <button class="oe_stat_button"
+                        type="object"
+                        name="action_mobach_view_deliveries"
+                        icon="fa-truck"
+                        groups="stock.group_stock_user">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_value">
+                            <field name="mobach_delivery_count"/>
+                        </span>
+                        <span class="o_stat_text">Bons de livraison</span>
                     </div>
                 </button>
                 <button class="oe_stat_button"
@@ -362,12 +374,16 @@
                             <!-- Boutons de drill-down -->
                             <div class="d-flex gap-1 flex-shrink-0">
                                 <a type="object" name="action_mobach_view_customer_invoices" class="btn btn-sm btn-outline-primary py-0 px-2 rounded-pill" role="button" title="Factures Clients">
-                                    <i class="fa fa-file-text-o me-1" aria-label="Factures Clients"/>
+                                    <i class="fa fa-pencil-square-o me-1" aria-label="Factures Clients"/>
                                     <field name="mobach_customer_invoice_count"/>
                                 </a>
                                 <a type="object" name="action_mobach_view_vendor_bills" class="btn btn-sm btn-outline-secondary py-0 px-2 rounded-pill" role="button" title="Factures Fournisseurs">
-                                    <i class="fa fa-truck me-1" aria-label="Factures Fournisseurs"/>
+                                    <i class="fa fa-file-text-o me-1" aria-label="Factures Fournisseurs"/>
                                     <field name="mobach_vendor_bill_count"/>
+                                </a>
+                                <a type="object" name="action_mobach_view_deliveries" class="btn btn-sm btn-outline-secondary py-0 px-2 rounded-pill" role="button" title="Bons de livraison" groups="stock.group_stock_user">
+                                    <i class="fa fa-truck me-1" aria-label="Bons de livraison"/>
+                                    <field name="mobach_delivery_count"/>
                                 </a>
                                 <a type="object" name="action_mobach_view_analytic_lines" class="btn btn-sm btn-outline-secondary py-0 px-2 rounded-pill" role="button" title="Écritures analytiques">
                                     <i class="fa fa-list me-1" aria-label="Écritures analytiques"/>

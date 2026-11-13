@@ -46,6 +46,8 @@ Fonctionnalites :
         'sale_project',
         'purchase',
         'project_purchase',
+        'project_stock',
+        'sale_stock',
     ],
     'data': [
         'security/ir.model.access.csv',
