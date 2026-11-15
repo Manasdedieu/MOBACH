@@ -13,9 +13,6 @@ def post_init_hook(env):
     `account_id` vide : sans rattrapage ils resteraient non imputables, et le
     champ « Projet analytique » des lignes ne ventilerait rien pour eux.
     """
-    # Garantit l'existence du projet Générique pour les lignes sans projet
-    env['project.project']._mobach_get_generic_project()
-
     projects = env['project.project'].with_context(active_test=False).search([
         ('account_id', '=', False),
         ('is_template', '=', False),
