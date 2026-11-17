@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'MOBACH - Comptabilité Analytique par Projet',
-    'version': '19.0.1.4.0',
+    'version': '19.0.1.5.0',
     'category': 'Accounting/Accounting',
     'summary': "Affecter un projet aux lignes de commande, de facture et d'écriture, "
                "et suivre le chiffre d'affaires et les dépenses par projet",
@@ -44,10 +44,12 @@ Fonctionnalites :
         'project',
         'sale_management',
         'sale_project',
+        'sale_stock',
         'purchase',
         'project_purchase',
-        'project_stock',
-        'sale_stock',
+        'purchase_stock',
+        'stock',
+        'mobach_config',
     ],
     'data': [
         'security/ir.model.access.csv',

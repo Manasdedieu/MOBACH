@@ -1,9 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!--
+        Projets Génériques par société (noupdate="1") :
+        - Créés une seule fois et identifiés uniquement par leur XML ID dans le code.
+        - Si un utilisateur renomme un de ces projets dans Odoo, le code continue de
+          fonctionner (via `env.ref(...)`) et `noupdate="1"` empêche Odoo d'écraser
+          le nom personnalisé lors des `-u`.
+    -->
     <data noupdate="1">
-        <record id="project_generic" model="project.project">
-            <field name="name">Générique</field>
+
+        <!-- 1. MOBACH SARL -->
+        <record id="project_generic_mobach" model="project.project">
+            <field name="name">Générique - MOBACH SARL</field>
+            <field name="company_id" ref="base.main_company"/>
             <field name="privacy_visibility">portal</field>
         </record>
+
+        <!-- 2. NAS ET FILS SARL -->
+        <record id="project_generic_nas_et_fils" model="project.project">
+            <field name="name">Générique - NAS ET FILS SARL</field>
+            <field name="company_id" ref="mobach_config.company_nas_et_fils"/>
+            <field name="privacy_visibility">portal</field>
+        </record>
+
+        <!-- 3. MOHAMADOU BACHIROU SARL -->
+        <record id="project_generic_mohamadou_bachirou" model="project.project">
+            <field name="name">Générique - MOHAMADOU BACHIROU SARL</field>
+            <field name="company_id" ref="mobach_config.company_mohamadou_bachirou"/>
+            <field name="privacy_visibility">portal</field>
+        </record>
+
+        <!-- 4. AFRIDRIVE SARL -->
+        <record id="project_generic_afridrive" model="project.project">
+            <field name="name">Générique - AFRIDRIVE SARL</field>
+            <field name="company_id" ref="mobach_config.company_afridrive"/>
+            <field name="privacy_visibility">portal</field>
+        </record>
+
     </data>
 </odoo>

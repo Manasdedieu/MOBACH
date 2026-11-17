@@ -27,7 +27,7 @@
                 <button class="oe_stat_button"
                         type="object"
                         name="action_mobach_view_vendor_bills"
-                        icon="fa-file-text-o"
+                        icon="fa-book"
                         groups="account.group_account_invoice">
                     <div class="o_field_widget o_stat_info">
                         <span class="o_stat_value">
@@ -38,14 +38,26 @@
                 </button>
                 <button class="oe_stat_button"
                         type="object"
-                        name="action_mobach_view_deliveries"
+                        name="action_mobach_view_delivery_pickings"
                         icon="fa-truck"
                         groups="stock.group_stock_user">
                     <div class="o_field_widget o_stat_info">
                         <span class="o_stat_value">
-                            <field name="mobach_delivery_count"/>
+                            <field name="mobach_delivery_picking_count"/>
                         </span>
-                        <span class="o_stat_text">Bons de livraison</span>
+                        <span class="o_stat_text">Bons de Livraison</span>
+                    </div>
+                </button>
+                <button class="oe_stat_button"
+                        type="object"
+                        name="action_mobach_view_receipt_pickings"
+                        icon="fa-download"
+                        groups="stock.group_stock_user">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_value">
+                            <field name="mobach_receipt_picking_count"/>
+                        </span>
+                        <span class="o_stat_text">Bons de Réception</span>
                     </div>
                 </button>
                 <button class="oe_stat_button"
@@ -243,6 +255,8 @@
                 <field name="mobach_analytic_line_count"/>
                 <field name="mobach_customer_invoice_count"/>
                 <field name="mobach_vendor_bill_count"/>
+                <field name="mobach_delivery_picking_count"/>
+                <field name="mobach_receipt_picking_count"/>
                 <templates>
                     <t t-name="card">
                         <main t-attf-class="d-flex flex-column h-100 border-start border-4 {{ record.mobach_profitability_status.raw_value == 'profitable' ? 'border-success' : (record.mobach_profitability_status.raw_value == 'loss' ? 'border-danger' : 'border-secondary') }} p-2 ps-3">
@@ -364,33 +378,28 @@
                             </div>
                         </main>
 
-                        <footer class="pt-2 d-flex justify-content-between align-items-center border-top">
-                            <!-- Compte analytique lié -->
-                            <div class="small text-truncate me-2" style="max-width: 130px;">
-                                <span t-if="record.account_id.value" class="badge bg-light text-dark border px-2 py-1 text-truncate" t-att-title="'Compte analytique: ' + record.account_id.value">
-                                    <i class="fa fa-tag me-1 text-primary"/> <field name="account_id"/>
-                                </span>
-                            </div>
-                            <!-- Boutons de drill-down -->
-                            <div class="d-flex gap-1 flex-shrink-0">
-                                <a type="object" name="action_mobach_view_customer_invoices" class="btn btn-sm btn-outline-primary py-0 px-2 rounded-pill" role="button" title="Factures Clients">
-                                    <i class="fa fa-pencil-square-o me-1" aria-label="Factures Clients"/>
-                                    <field name="mobach_customer_invoice_count"/>
+                        <footer class="pt-2 border-top d-flex flex-column gap-1">
+                            <!-- Ligne des 4 liens documents : Factures Clients, Factures Achats, BL Clients, BR Fournisseurs -->
+                            <div class="d-flex flex-wrap justify-content-between gap-1 w-100">
+                                <a type="object" name="action_mobach_view_customer_invoices"
+                                   class="btn btn-sm btn-outline-primary py-0 px-2 rounded-pill flex-fill text-nowrap"
+                                   role="button" title="Factures Clients qui impactent le projet">
+                                    <i class="fa fa-file-text-o me-1" aria-label="Factures Clients"/>Fact. Client (<field name="mobach_customer_invoice_count"/>)
                                 </a>
-                                <a type="object" name="action_mobach_view_vendor_bills" class="btn btn-sm btn-outline-secondary py-0 px-2 rounded-pill" role="button" title="Factures Fournisseurs">
-                                    <i class="fa fa-file-text-o me-1" aria-label="Factures Fournisseurs"/>
-                                    <field name="mobach_vendor_bill_count"/>
+                                <a type="object" name="action_mobach_view_vendor_bills"
+                                   class="btn btn-sm btn-outline-danger py-0 px-2 rounded-pill flex-fill text-nowrap"
+                                   role="button" title="Factures d'Achat qui impactent le projet">
+                                    <i class="fa fa-shopping-bag me-1" aria-label="Factures Achat"/>Fact. Achat (<field name="mobach_vendor_bill_count"/>)
                                 </a>
-                                <a type="object" name="action_mobach_view_deliveries" class="btn btn-sm btn-outline-secondary py-0 px-2 rounded-pill" role="button" title="Bons de livraison" groups="stock.group_stock_user">
-                                    <i class="fa fa-truck me-1" aria-label="Bons de livraison"/>
-                                    <field name="mobach_delivery_count"/>
+                                <a type="object" name="action_mobach_view_delivery_pickings"
+                                   class="btn btn-sm btn-outline-info py-0 px-2 rounded-pill flex-fill text-nowrap"
+                                   role="button" title="Bons de Livraison Client liés au projet">
+                                    <i class="fa fa-truck me-1" aria-label="Bons de Livraison"/>BL Client (<field name="mobach_delivery_picking_count"/>)
                                 </a>
-                                <a type="object" name="action_mobach_view_analytic_lines" class="btn btn-sm btn-outline-secondary py-0 px-2 rounded-pill" role="button" title="Écritures analytiques">
-                                    <i class="fa fa-list me-1" aria-label="Écritures analytiques"/>
-                                    <field name="mobach_analytic_line_count"/>
-                                </a>
-                                <a type="object" name="action_mobach_view_margin_report" class="btn btn-sm btn-outline-success py-0 px-2 rounded-pill" role="button" title="Tableau de rentabilité">
-                                    <i class="fa fa-table" aria-label="Rentabilité"/>
+                                <a type="object" name="action_mobach_view_receipt_pickings"
+                                   class="btn btn-sm btn-outline-warning py-0 px-2 rounded-pill flex-fill text-nowrap"
+                                   role="button" title="Bons de Réception Fournisseur liés au projet">
+                                    <i class="fa fa-download me-1" aria-label="Bons de Réception"/>BR Fourn. (<field name="mobach_receipt_picking_count"/>)
                                 </a>
                             </div>
                         </footer>

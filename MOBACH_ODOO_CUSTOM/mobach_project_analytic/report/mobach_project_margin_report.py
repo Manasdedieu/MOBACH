@@ -83,12 +83,25 @@ class MobachProjectMarginReport(models.Model):
     # ------------------------------------------------------------------
     @property
     def _table_query(self):
-        generic_project = self.env['project.project']._mobach_get_generic_project()
-        generic_id = generic_project.id if generic_project else 0
+        generic_names = tuple(
+            xmlid.split('.')[1]
+            for xmlid in self.env['project.project'].GENERIC_PROJECT_XMLIDS
+        )
 
         return SQL(
             """
-            WITH ranked_lines AS (
+            WITH generic_projects AS (
+                SELECT
+                    pp.company_id AS company_id,
+                    pp.id         AS generic_project_id
+                FROM ir_model_data imd
+                JOIN project_project pp ON pp.id = imd.res_id
+                WHERE imd.module = 'mobach_project_analytic'
+                  AND imd.model = 'project.project'
+                  AND imd.name IN %(generic_names)s
+                  AND pp.company_id IS NOT NULL
+            ),
+            ranked_lines AS (
                 SELECT
                     aml.id                          AS id,
                     aml.move_id                     AS move_id,
@@ -104,16 +117,17 @@ class MobachProjectMarginReport(models.Model):
                     aml.quantity                    AS unit_amount,
                     aml.price_total                 AS price_total,
                     aml.balance                     AS balance,
-                    COALESCE(aml.analytic_project_id, %(generic_id)s) AS project_id,
+                    COALESCE(aml.analytic_project_id, gp.generic_project_id) AS project_id,
                     am.amount_total                 AS amount_total,
                     GREATEST(0.0, LEAST(am.amount_total, am.amount_total - am.amount_residual)) AS paid_total,
                     COALESCE(SUM(aml.price_total) OVER (
                         PARTITION BY aml.move_id
-                        ORDER BY (CASE WHEN aml.analytic_project_id IS NULL OR aml.analytic_project_id = %(generic_id)s THEN 1 ELSE 0 END), aml.sequence, aml.id
+                        ORDER BY (CASE WHEN aml.analytic_project_id IS NULL OR aml.analytic_project_id IN (SELECT generic_project_id FROM generic_projects) THEN 1 ELSE 0 END), aml.sequence, aml.id
                         ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING
                     ), 0.0)                         AS prev_cumul
                 FROM account_move_line aml
                 JOIN account_move am ON am.id = aml.move_id
+                LEFT JOIN generic_projects gp ON gp.company_id = am.company_id
                 WHERE am.state = 'posted'
                   AND (
                       (am.move_type IN ('out_invoice', 'out_refund', 'in_invoice', 'in_refund')
@@ -192,9 +206,9 @@ class MobachProjectMarginReport(models.Model):
                         (CASE WHEN rl.move_type = 'in_refund' THEN -1.0 ELSE 1.0 END) * (rl.price_total - LEAST(rl.price_total, GREATEST(0.0, rl.paid_total - rl.prev_cumul)))
                     ELSE 0.0
                 END                             AS vendor_encours,
-                -- Marge (0 pour le projet Générique)
+                -- Marge (0 pour les projets Génériques de société)
                 CASE
-                    WHEN rl.project_id = %(generic_id)s THEN 0.0
+                    WHEN rl.project_id IN (SELECT generic_project_id FROM generic_projects) THEN 0.0
                     ELSE (
                         (CASE
                             WHEN rl.move_type IN ('out_invoice', 'out_refund') THEN
@@ -217,7 +231,7 @@ class MobachProjectMarginReport(models.Model):
             JOIN project_project pp ON pp.id = rl.project_id
             LEFT JOIN account_account aa ON aa.id = rl.general_account_id
             """,
-            generic_id=generic_id,
+            generic_names=generic_names,
             revenue_types=tuple(REVENUE_ACCOUNT_TYPES),
             expense_types=tuple(EXPENSE_ACCOUNT_TYPES),
         )
