@@ -18,4 +18,12 @@
         <field name="paperformat_id" ref="paperformat_mobach_a4"/>
         <field name="mobach_full_page_background" eval="True"/>
     </record>
+    <record id="stock.action_report_delivery" model="ir.actions.report">
+        <field name="paperformat_id" ref="paperformat_mobach_a4"/>
+        <field name="mobach_full_page_background" eval="True"/>
+    </record>
+    <record id="stock.action_report_picking" model="ir.actions.report">
+        <field name="paperformat_id" ref="paperformat_mobach_a4"/>
+        <field name="mobach_full_page_background" eval="True"/>
+    </record>
 </odoo>
