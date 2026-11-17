@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'MOBACH - Fond de page pleine page des rapports',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.1.0',
     'summary': "Image de fond couvrant toute la page PDF (en-tête, corps et pied de page) pour tous les external_layout",
     'description': """
         Ajoute l'option « Pleine page » au champ Fond (layout_background) de la
@@ -22,12 +22,13 @@
     'author': 'MOBACH',
     'category': 'Technical',
     # mobach_sale : champ « object » (Objet) et titres / objet qu'il ajoute aux rapports, masqués ici.
-    'depends': ['web', 'sale', 'account', 'sale_pdf_quote_builder', 'mobach_sale'],
+    'depends': ['web', 'sale', 'account', 'stock', 'sale_pdf_quote_builder', 'mobach_sale'],
     'data': [
         'data/report_paperformat_data.xml',
         'data/ir_actions_report_data.xml',
         'views/ir_actions_report_views.xml',
         'views/report_templates.xml',
+        'views/report_stock_templates.xml',
         'views/base_document_layout_views.xml',
     ],
     'assets': {

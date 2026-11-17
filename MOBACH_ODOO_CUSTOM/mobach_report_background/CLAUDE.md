@@ -5,9 +5,10 @@
 Afficher une image de fond sur **toute la page PDF** (en-tête + corps + pied de page),
 compatible avec tous les `external_layout_*` (standard, boxed, bold, striped, folder, wave, bubble).
 
-**Périmètre voulu (décision utilisateur) :** seuls le **devis / bon de commande** et les
-**factures** ont le fond et le format A4 MOBACH. **Tous les autres rapports restent natifs**
-(format papier de la société, sans fond), y compris le pro-forma.
+**Périmètre voulu (décision utilisateur) :** le **devis / bon de commande**, les **factures** et,
+depuis le 2026-11-16, le **bordereau de livraison** et le **bon de préparation** des transferts ont le
+fond et le format A4 MOBACH. **Tous les autres rapports restent natifs** (format papier de la société,
+sans fond), y compris le pro-forma, le bon de retour et les étiquettes.
 
 | Rapport | xmlid |
 |---|---|
@@ -15,6 +16,8 @@ compatible avec tous les `external_layout_*` (standard, boxed, bold, striped, fo
 | Facture (avec paiements) | `account.account_invoices` |
 | Facture (sans paiement) | `account.account_invoices_without_payment` |
 | Devis / Bon de commande (Quote Builder) | `sale_pdf_quote_builder.action_report_saleorder_raw` |
+| Bordereau de livraison | `stock.action_report_delivery` |
+| Bon de préparation (Picking Operations) | `stock.action_report_picking` |
 
 `sale_pdf_quote_builder` s'installe automatiquement avec `sale_management`. Quand il est installé,
 c'est ce rapport « raw » qui est imprimé pour le devis, d'où la dépendance du module.
@@ -112,6 +115,33 @@ couvrir l'en-tête ni le pied : aucun CSS ne peut déborder d'un document à l'a
   aux `report_header` des pieds de page.
 - `nui` de la société vient de `mobach_config`, qui n'est **pas** une dépendance (module de configuration
   des sociétés MOBACH, trop large pour un module de rapport). D'où la garde `t-if="'nui' in company._fields"`.
+
+## Transferts (stock.picking)
+
+`views/report_stock_templates.xml`, même mécanique (`mobach_header`, `mobach_document_title`, `mobach_doc`) :
+
+- **Titre** selon `picking_type_id.code` : `outgoing` → BON DE LIVRAISON, `incoming` → BON DE RÉCEPTION,
+  sinon BON DE TRANSFERT, suivi du numéro. Identique sur les deux rapports.
+- **Cadres** (`report_document_info_mobach`, branche `is_picking`) : gauche = partenaire (`partner_id`, à défaut celui
+  du 1er mouvement) libellé Client / Fournisseur / Contact selon le type ; droite = Date effective (`date_done`, si
+  `done`) ou Date prévue (`scheduled_date`), Document d'origine (`origin`), puis pour une sortie : Réf. PROFORMA
+  (`sale_id.client_order_ref`, si présente), Lieu et Adresse de livraison (1er mouvement, sinon `partner_id`, comme le
+  natif) ; pour les autres types : Entrepôt.
+- **OBJET** : celui du devis lié (`sale_id.object`, via `sale_stock`, gardé par `'sale_id' in _fields`) ; ligne absente sinon.
+- **Bordereau** : `h2` natif et `div#informations` masqués (opérateur, incoterm, transporteur… ne sont plus imprimés).
+  Colonne N° : `move_index` (non validé) ; validé → héritage des sous-templates
+  `stock_report_delivery_has_serial_move_line` (`move_line_index`) et `stock_report_delivery_aggregated_move_lines`
+  (`line_index`) : la numérotation **repart à 1 dans chaque section** (colis, kit, sans colis).
+- **Bon de préparation** : le natif utilise `web.report_layout` avec **un seul** `div.article` pour tous les
+  transferts (ni en-tête, ni pied, ni `o_company_<id>_layout` → pas de fond). L'article natif perd sa classe
+  (`o_mobach_picking_documents`) et chaque `div.page` est enveloppé dans `web.external_layout` via un `replace` avec
+  `$0` (les héritages des autres modules sur le contenu du `div.page` restent valables). Résultat : un article,
+  donc une pagination « Page x / y », par transfert. Titre natif et adresses masqués ; code-barres, entrepôt, statut,
+  opérateur, instructions conservés ; origine, date, contact, fournisseur masqués (dans les cadres). Colonne N° par
+  mouvement (`move_index`), cellule vide sur les lignes de détail.
+- Pas de montant en lettres (aucun prix sur ces documents).
+- Test local : le widget code-barres échoue si le backend reportlab `rlPyCairo` manque (indépendant du module) ;
+  dans le shell de test, remplacer `IrActionsReport.barcode` par un PNG factice.
 
 ## Image par défaut MOBACH
 

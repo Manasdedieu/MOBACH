@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Transferts (stock.picking) : même habillage MOBACH que le devis et la facture
+         (en-tête, pied, titre encadré, cadres partenaire / informations, colonne N°).
+         Pas de montant en lettres : ces documents n'affichent pas de prix. -->
+
+    <!-- ===== Bordereau de livraison (stock.action_report_delivery) ===== -->
+    <template id="report_delivery_document_mobach_header" inherit_id="stock.report_delivery_document">
+        <xpath expr="//t[@t-call='web.external_layout']/t[@t-set='o']" position="after">
+            <t t-set="mobach_header" t-value="True"/>
+            <t t-set="mobach_document_title"
+               t-value="{'outgoing': 'BON DE LIVRAISON', 'incoming': 'BON DE RÉCEPTION'}.get(o.picking_type_id.code, 'BON DE TRANSFERT')"/>
+            <t t-set="mobach_doc" t-value="o"/>
+        </xpath>
+        <!-- Titre natif (type d'opération + numéro) : remplacé par le titre encadré. -->
+        <xpath expr="//div[hasclass('page')]/h2" position="attributes">
+            <attribute name="t-if">not mobach_header</attribute>
+        </xpath>
+        <!-- Ligne d'informations native (origine, date, contact, opérateur, réf. client, incoterm…) :
+             masquée comme sur le devis ; l'essentiel est dans le cadre d'informations MOBACH.
+             Sans ça, il resterait une barre vide (fond du layout) sous l'OBJET. -->
+        <xpath expr="//div[@id='informations']" position="attributes">
+            <attribute name="t-if">not mobach_header</attribute>
+        </xpath>
+        <!-- Colonne N° : transfert non validé (une ligne par mouvement). -->
+        <xpath expr="//th[@name='th_sm_product']" position="before">
+            <th t-if="mobach_header" name="th_mobach_line_number">N°</th>
+        </xpath>
+        <xpath expr="//table[@name='stock_move_table']/tbody/tr/td[1]" position="before">
+            <td t-if="mobach_header" name="td_mobach_line_number"><t t-out="move_index + 1"/></td>
+        </xpath>
+        <!-- Colonne N° : transfert validé (lignes détaillées ou regroupées, voir les sous-templates). -->
+        <xpath expr="//th[@name='th_sml_product']" position="before">
+            <th t-if="mobach_header" name="th_mobach_line_number">N°</th>
+        </xpath>
+    </template>
+
+    <!-- Lignes du bordereau validé. La numérotation repart à 1 dans chaque section
+         (colis, kit, produits sans colis) : chaque section est rendue par son propre t-call. -->
+    <template id="stock_report_delivery_has_serial_move_line_mobach" inherit_id="stock.stock_report_delivery_has_serial_move_line">
+        <xpath expr="//td[1]" position="before">
+            <td t-if="mobach_header" name="td_mobach_line_number"><t t-out="move_line_index + 1"/></td>
+        </xpath>
+    </template>
+    <template id="stock_report_delivery_aggregated_move_lines_mobach" inherit_id="stock.stock_report_delivery_aggregated_move_lines">
+        <xpath expr="//tr/td[1]" position="before">
+            <td t-if="mobach_header" name="td_mobach_line_number"><t t-out="line_index + 1"/></td>
+        </xpath>
+    </template>
+
+    <!-- ===== Bon de préparation (stock.action_report_picking) ===== -->
+    <!-- Le rapport natif utilise web.report_layout (pas d'en-tête ni de pied de page) avec un
+         seul div.article pour tous les transferts. Chaque transfert passe ici dans
+         web.external_layout ($0 = le div.page natif, avec les héritages des autres modules) :
+         en-tête / pied MOBACH, fond pleine page et un article par transfert. -->
+    <template id="report_picking_mobach_header" inherit_id="stock.report_picking">
+        <!-- L'article natif devient un simple conteneur : ce sont les articles de
+             external_layout qui sont extraits par ir.actions.report. -->
+        <xpath expr="//div[hasclass('article')]" position="attributes">
+            <attribute name="class">o_mobach_picking_documents</attribute>
+        </xpath>
+        <xpath expr="//div[hasclass('page')]" position="replace">
+            <t t-call="web.external_layout">
+                <t t-set="mobach_header" t-value="True"/>
+                <t t-set="mobach_document_title"
+                   t-value="{'outgoing': 'BON DE LIVRAISON', 'incoming': 'BON DE RÉCEPTION'}.get(o.picking_type_id.code, 'BON DE TRANSFERT')"/>
+                <t t-set="mobach_doc" t-value="o"/>
+                <t>$0</t>
+            </t>
+        </xpath>
+        <!-- Saut de page entre transferts : inutile, un article par transfert. -->
+        <xpath expr="//p[@style='page-break-after: always;']/.." position="attributes">
+            <attribute name="t-if">False</attribute>
+        </xpath>
+        <!-- Titre natif (type + numéro) masqué ; le code-barres du document reste. -->
+        <xpath expr="//div[@name='right_box']/preceding-sibling::div[1]" position="attributes">
+            <attribute name="t-if">not mobach_header</attribute>
+        </xpath>
+        <!-- Adresses natives : remplacées par les cadres MOBACH. -->
+        <xpath expr="//div[@name='div_outgoing_address']/.." position="attributes">
+            <attribute name="t-if">not mobach_header</attribute>
+        </xpath>
+        <!-- Origine, date, contact et fournisseur : repris dans les cadres MOBACH.
+             Entrepôt, statut, opérateur et instructions restent. -->
+        <xpath expr="//div[@name='div_origin']" position="attributes">
+            <attribute name="t-if">o.origin and not mobach_header</attribute>
+        </xpath>
+        <xpath expr="//div[@name='div_picking_date']" position="attributes">
+            <attribute name="t-if">not mobach_header</attribute>
+        </xpath>
+        <xpath expr="//div[@name='div_contact']" position="attributes">
+            <attribute name="t-if">o.picking_type_id.code == 'internal' and o.partner_id and not mobach_header</attribute>
+        </xpath>
+        <xpath expr="//div[@name='div_vendor']" position="attributes">
+            <attribute name="t-if">o.picking_type_id.code == 'incoming' and o.partner_id and not mobach_header</attribute>
+        </xpath>
+        <!-- Colonne N° : une par mouvement, cellule vide sur les lignes de détail (lots, emplacements). -->
+        <xpath expr="//th[@name='th_product']" position="before">
+            <th t-if="mobach_header" name="th_mobach_line_number" class="text-start" style="width: 6%;">
+                <strong>N°</strong>
+            </th>
+        </xpath>
+        <xpath expr="//t[@t-as='move']/tr/td[1]" position="before">
+            <td t-if="mobach_header" name="td_mobach_line_number" class="text-start"><t t-out="move_index + 1"/></td>
+        </xpath>
+        <xpath expr="//t[@t-as='line']/tr/td[1]" position="before">
+            <td t-if="mobach_header"/>
+        </xpath>
+    </template>
+</odoo>

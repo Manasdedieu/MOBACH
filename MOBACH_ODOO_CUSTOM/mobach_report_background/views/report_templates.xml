@@ -62,24 +62,60 @@
         <t t-call="mobach_report_background.report_document_info_mobach"/>
     </template>
 
-    <!-- mobach_doc : sale.order ou account.move. -->
+    <!-- mobach_doc : sale.order, account.move ou stock.picking. -->
     <template id="report_document_info_mobach">
         <t t-set="is_invoice" t-value="mobach_doc._name == 'account.move'"/>
-        <t t-set="shipping" t-value="mobach_doc.partner_shipping_id"/>
+        <t t-set="is_picking" t-value="mobach_doc._name == 'stock.picking'"/>
+        <t t-if="is_picking">
+            <t t-set="picking_code" t-value="mobach_doc.picking_type_id.code"/>
+            <t t-set="partner" t-value="mobach_doc.partner_id or mobach_doc.move_ids[:1].partner_id"/>
+            <!-- Adresse de livraison : même règle que le bordereau natif. -->
+            <t t-set="shipping" t-value="mobach_doc.move_ids[:1].partner_id or mobach_doc.partner_id"/>
+            <t t-set="partner_label" t-value="{'outgoing': 'Client', 'incoming': 'Fournisseur'}.get(picking_code, 'Contact')"/>
+            <!-- Objet : celui du devis lié (sale_stock), sinon pas de ligne OBJET. -->
+            <t t-set="mobach_object" t-value="'sale_id' in mobach_doc._fields and mobach_doc.sudo().sale_id.object"/>
+        </t>
+        <t t-else="">
+            <t t-set="partner" t-value="mobach_doc.partner_id"/>
+            <t t-set="shipping" t-value="mobach_doc.partner_shipping_id"/>
+            <t t-set="partner_label" t-value="'Doit'"/>
+        </t>
         <!-- NUI / RCCM (mobach_sale), à défaut N° TVA / Company ID, portés par la société cliente. -->
-        <t t-set="client" t-value="mobach_doc.partner_id.commercial_partner_id"/>
+        <t t-set="client" t-value="partner.commercial_partner_id"/>
         <div class="row col-sm-12 ml-auto d-flex mb-3" style="font-size: 13px;">
-            <!-- Client -->
+            <!-- Client (ou fournisseur / contact pour les transferts) -->
             <div style="width: 48.5%; border: 1px solid #000; padding: 8px 10px;" name="mobach_partner_block">
-                <div><strong>Doit :</strong> <span t-out="client.name"/></div>
+                <div><strong><t t-out="partner_label"/> :</strong> <span t-out="client.name"/></div>
                 <div><strong>NUI :</strong> <span t-out="client.nui or client.vat"/></div>
                 <div><strong>RCCM :</strong> <span t-out="client.rccm or client.company_registry"/></div>
-                <div><strong>Tél :</strong> <span t-out="mobach_doc.partner_id.phone or client.phone"/></div>
-                <div><strong>Email :</strong> <span t-out="mobach_doc.partner_id.email or client.email"/></div>
+                <div><strong>Tél :</strong> <span t-out="partner.phone or client.phone"/></div>
+                <div><strong>Email :</strong> <span t-out="partner.email or client.email"/></div>
             </div>
             <!-- Informations du document (le numéro est dans le titre) -->
             <div style="width: 48.5%; margin-left: 3%; border: 1px solid #000; padding: 8px 10px;" name="mobach_document_block">
-                <t t-if="is_invoice">
+                <t t-if="is_picking">
+                    <div t-if="mobach_doc.state == 'done' and mobach_doc.date_done">
+                        <strong>Date effective :</strong> <span t-field="mobach_doc.date_done" t-options="{&quot;widget&quot;: &quot;date&quot;}"/>
+                    </div>
+                    <div t-else="">
+                        <strong>Date prévue :</strong> <span t-field="mobach_doc.scheduled_date" t-options="{&quot;widget&quot;: &quot;date&quot;}"/>
+                    </div>
+                    <div><strong>Document d'origine :</strong> <span t-field="mobach_doc.origin"/></div>
+                    <t t-if="picking_code == 'outgoing'">
+                        <!-- Même libellé que sur le devis (client_order_ref). -->
+                        <div t-if="'sale_id' in mobach_doc._fields and mobach_doc.sudo().sale_id.client_order_ref">
+                            <strong>Réf. PROFORMA :</strong> <span t-out="mobach_doc.sudo().sale_id.client_order_ref"/>
+                        </div>
+                        <div><strong>Lieu de livraison :</strong> <span t-out="shipping.city"/></div>
+                        <div class="d-flex">
+                            <strong class="text-nowrap me-1">Adresse de livraison :</strong>
+                            <span t-if="shipping" t-out="shipping"
+                                  t-options="{&quot;widget&quot;: &quot;contact&quot;, &quot;fields&quot;: [&quot;address&quot;], &quot;no_marker&quot;: true}"/>
+                        </div>
+                    </t>
+                    <div t-else=""><strong>Entrepôt :</strong> <span t-out="mobach_doc.picking_type_id.warehouse_id.name"/></div>
+                </t>
+                <t t-elif="is_invoice">
                     <div><strong>Date d'émission :</strong> <span t-field="mobach_doc.invoice_date"/></div>
                     <div><strong>Réf. PROFORMA :</strong> <span t-field="mobach_doc.ref"/></div>
                 </t>
@@ -87,8 +123,8 @@
                     <div><strong>Date d'émission :</strong> <span t-field="mobach_doc.date_order" t-options="{&quot;widget&quot;: &quot;date&quot;}"/></div>
                     <div><strong>Réf. PROFORMA :</strong> <span t-field="mobach_doc.client_order_ref"/></div>
                 </t>
-                <!-- Livraison : devis uniquement. -->
-                <t t-if="not is_invoice">
+                <!-- Livraison : devis uniquement (les transferts l'affichent plus haut). -->
+                <t t-if="not is_invoice and not is_picking">
                     <div><strong>Lieu de livraison :</strong> <span t-out="shipping.city"/></div>
                     <div class="d-flex">
                         <strong class="text-nowrap me-1">Adresse de livraison :</strong>
@@ -98,7 +134,11 @@
                 </t>
             </div>
         </div>
-        <div class="mb-2">
+        <div t-if="is_picking and mobach_object" class="mb-2">
+            <strong style="text-decoration: underline;">OBJET :</strong>
+            <span class="ms-2" t-out="mobach_object"/>
+        </div>
+        <div t-elif="not is_picking" class="mb-2">
             <strong style="text-decoration: underline;">OBJET :</strong>
             <span class="ms-2" t-field="mobach_doc.object"/>
         </div>
