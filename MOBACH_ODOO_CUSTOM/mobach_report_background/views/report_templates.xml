@@ -147,7 +147,7 @@
     <!-- Montant total en lettres, affiché sous les totaux (mobach_doc : sale.order ou account.move). -->
     <template id="report_amount_in_words_mobach">
         <div class="mt-3 mb-3" style="clear: both;" name="mobach_amount_in_words">
-            <t t-if="mobach_doc._name == 'sale.order'">Arrêté le présent bon de commande à la somme de :</t>
+            <t t-if="mobach_doc._name == 'sale.order'">Arrêté le présent devis à la somme de :</t>
             <t t-elif="mobach_doc.move_type in ('out_refund', 'in_refund')">Arrêté le présent avoir à la somme de :</t>
             <t t-else="">Arrêtée la présente facture à la somme de :</t>
             <!-- En français comme le reste du document, quelle que soit la langue du client. -->
@@ -320,7 +320,8 @@
         <xpath expr="//t[@t-call='web.external_layout']/t[@t-set='forced_vat']" position="after">
             <!-- Le pro-forma utilise le même document mais reste natif. -->
             <t t-set="mobach_header" t-value="not is_pro_forma"/>
-            <t t-set="mobach_document_title" t-value="not is_pro_forma and 'BON DE COMMANDE'"/>
+            <!-- Titre « Devis : N° » quel que soit l'état (devis ou commande confirmée). -->
+            <t t-set="mobach_document_title" t-value="not is_pro_forma and 'Devis :'"/>
             <t t-set="mobach_doc" t-value="doc"/>
         </xpath>
         <xpath expr="//t[@t-set='layout_document_title']" position="after">
@@ -378,6 +379,10 @@
             <attribute name="t-if">False</attribute>
         </xpath>
         <xpath expr="//span[@t-field='o.object']/ancestor::div[hasclass('row')][1]" position="attributes">
+            <attribute name="t-if">False</attribute>
+        </xpath>
+        <!-- Pas de « Communication de paiement : … / sur ce compte : … » sur les factures MOBACH. -->
+        <xpath expr="//p[@name='payment_communication']/.." position="attributes">
             <attribute name="t-if">False</attribute>
         </xpath>
         <!-- Numérotation des lignes de produit (colonne N°). -->
